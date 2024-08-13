@@ -48,6 +48,8 @@ public class Tetromino : MonoBehaviour
 
     public void MoveObjet(Vector2 inputVec)
     {
+        if (!IsVaildPosition()) return;
+
         transform.Translate(inputVec * 0.25f);
     }
 }
