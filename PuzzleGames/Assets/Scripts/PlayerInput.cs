@@ -70,7 +70,7 @@ public class PlayerInput : MonoBehaviour
 
     private void OnBlockMoveStart(InputAction.CallbackContext context)
     {
-        Debug.Log($"start");
+
     }
 
     private void OnBlockMove(InputAction.CallbackContext context)
