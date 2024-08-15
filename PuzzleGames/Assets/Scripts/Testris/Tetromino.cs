@@ -30,6 +30,11 @@ public class Tetromino : MonoBehaviour
     }
 
     /// <summary>
+    /// 블록 그리드 위치 저장 배열 (4x4)
+    /// </summary>
+    private Vector2[] gridPositions;
+
+    /// <summary>
     /// 테트리스 블록 배열
     /// </summary>
     private GameObject[] blocks;
@@ -72,11 +77,19 @@ public class Tetromino : MonoBehaviour
     private void Awake()
     {
         blocks = new GameObject[4];
-
         for(int i = 0; i < blocks.Length; i++)
         {
             Transform child = transform.GetChild(i);
             blocks[i] = child.gameObject;
+        }
+
+        gridPositions = new Vector2[16];
+        for(int y = 0; y < 4; y++)
+        {
+            for (int x = 0; x < 4; x++)
+            { 
+                gridPositions[x + 4 * y] = new Vector2(-0.25f + x * 0.25f, -0.25f + y * 0.25f) + centerVector;
+            }
         }
 
         checkObject = blocks[0]; // 센터 오브젝트 임의 지정
@@ -86,7 +99,7 @@ public class Tetromino : MonoBehaviour
     {
         dropTimer += Time.fixedDeltaTime;
 
-        if (allowMove && IsVaildPosition() && dropTimer > 1f)
+        if (allowMove && IsVaildPosition() && dropTimer > 0.25f)
         {
             dropTimer = 0f;
             transform.Translate(Vector2.down * DropScale);
@@ -113,28 +126,38 @@ public class Tetromino : MonoBehaviour
     /// </summary>
     private void MakeShape()
     {
-        switch(Type) 
+        switch (Type) 
         { 
-            case ShapeType.O:
+            case ShapeType.O: // 5 6 9 10
+                SetBlockPosition(5, 6, 9, 10);
                 break;
-            case ShapeType.I:
-                for(int i = 0; i < blocks.Length; i++)
-                {
-                    blocks[i].transform.localPosition = centerVector - (Vector2.up * 0.25f) + (Vector2.up * 0.25f) * i;
-
-                    if(blocks[i].transform.localPosition.y < checkObject.transform.localPosition.y)
-                    {
-                        checkObject = blocks[i];
-                    }
-                }
+            case ShapeType.I: // 1 5 9 13
+                SetBlockPosition(1, 5, 9, 13);
                 break;
-            case ShapeType.L: 
+            case ShapeType.L: // 5 6 9 13
+                SetBlockPosition(5, 6, 9, 13);
                 break;
-            case ShapeType.T:
+            case ShapeType.T: // 4 5 6 9
+                SetBlockPosition(4, 5, 6, 9);
                 break;
-            case ShapeType.S:
+            case ShapeType.S: // 4 5 9 10
+                SetBlockPosition(4, 5, 9, 10);
                 break;
         }
+    }
+
+    private void SetBlockPosition(int first, int second, int third, int fourth)
+    {
+        int[] ints = { first, second, third, fourth };
+        int index = 0;
+
+        foreach (var obj in blocks)
+        {
+            obj.transform.localPosition = gridPositions[ints[index]];
+            index++;
+        }
+
+        checkObject = blocks[0];
     }
 
     /// <summary>
@@ -143,7 +166,7 @@ public class Tetromino : MonoBehaviour
     /// <returns></returns>
     private bool IsVaildPosition()
     {
-        Vector2 currnetPosition = transform.localPosition + (checkObject.transform.localPosition * 2);
+        Vector2 currnetPosition = transform.localPosition + (checkObject.transform.localPosition - (Vector3)centerVector);
         return (currnetPosition.x < boardWidth
                 && currnetPosition.x > 0 
                 && currnetPosition.y < boardHeight + 2f
