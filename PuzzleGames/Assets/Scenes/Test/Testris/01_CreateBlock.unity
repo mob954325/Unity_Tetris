@@ -548,7 +548,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0166f83dc70454648b03deb288321eb2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tetrominoObjects: {fileID: 5364594095854447655, guid: 2da1713f633caa64e9a4637212cbf44e, type: 3}
+  tetrominoPrefab: {fileID: 5364594095854447655, guid: 2da1713f633caa64e9a4637212cbf44e, type: 3}
+  currentTetromino: {fileID: 0}
   boardWidth: 0
   boardHeight: 0
 --- !u!1 &1718263189

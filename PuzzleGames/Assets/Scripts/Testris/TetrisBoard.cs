@@ -15,7 +15,15 @@ public class TetrisBoard : MonoBehaviour
 
     private Transform tetrominoContainer;
 
-    public GameObject tetrominoObjects;
+    /// <summary>
+    /// 테트리스 블록 프리팹
+    /// </summary>
+    public GameObject tetrominoPrefab;
+
+    /// <summary>
+    /// 가장 최근에 스폰된 테트리스 블록
+    /// </summary>
+    public Tetromino currentTetromino;
 
     /// <summary>
     /// 보드 넓이
@@ -46,6 +54,18 @@ public class TetrisBoard : MonoBehaviour
         spawnPoint = child.gameObject.transform;
     }
 
+    private void FixedUpdate()
+    {
+        if (currentTetromino != null)
+        {
+            if(!IsVaildPosition())
+            {
+                currentTetromino.SetMoveAllow(false);
+                // 새로 생성
+            }
+        }
+    }
+
     public void Init()
     {
         CreateCells();
@@ -56,8 +76,8 @@ public class TetrisBoard : MonoBehaviour
     /// </summary>
     private void CreateCells()
     {
-        int count_x = (int)(boardWidth * 0.25f);
-        int count_y = (int)(boardHeight * 0.25f);
+        int count_x = (int)(boardWidth / 0.25f);
+        int count_y = (int)(boardHeight / 0.25f);
 
         cells = new Cell[count_x * count_y];
 
@@ -75,10 +95,40 @@ public class TetrisBoard : MonoBehaviour
     /// </summary>
     public void CreateTetromino(ShapeType type)
     {
-        Tetromino tetromino = Instantiate(tetrominoObjects).GetComponent<Tetromino>();
+        Tetromino tetromino = Instantiate(tetrominoPrefab).GetComponent<Tetromino>();
         tetromino.transform.parent = tetrominoContainer;
         tetromino.transform.localPosition = spawnPoint.transform.localPosition;
 
         tetromino.Init(type, boardWidth, boardHeight);
+
+        currentTetromino = tetromino;
+    }
+
+    /// <summary>
+    /// 현재 떨어지는 블록들이 게임 보드 안에 있는지 체크하는 함수
+    /// </summary>
+    /// <returns>안에 있으면 true 아니면 false</returns>
+    private bool IsVaildPosition()
+    {
+        bool result = true;
+        foreach(var obj in currentTetromino.GetBlocks())
+        {
+            Vector2Int grid = WorldToGrid(obj.transform.parent.localPosition + obj.transform.localPosition);
+
+            Debug.Log($"{obj.gameObject.name} : {grid}");
+            if(grid.x < 1 || grid.x > boardWidth / 0.25f || grid.y < 1 || grid.y > boardHeight / 0.25f + 5)
+            {
+                result = false;
+            }
+        }
+
+        Debug.Log(result);
+        return result;
+    }
+
+    // 좌표 변환 ===================================================================================
+    public Vector2Int WorldToGrid(Vector2 world)
+    {
+        return new Vector2Int((int)(world.x / 0.25f), (int)(world.y / 0.25f)); // 2D 프로젝트이여서 월드의 x y값 사용
     }
 }

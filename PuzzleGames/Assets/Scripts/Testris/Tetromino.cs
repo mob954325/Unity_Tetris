@@ -40,11 +40,6 @@ public class Tetromino : MonoBehaviour
     private GameObject[] blocks;
 
     /// <summary>
-    /// 경계선 체크하는 기준 오브젝트
-    /// </summary>
-    public GameObject checkObject;
-
-    /// <summary>
     /// 중심 값 벡터
     /// </summary>
     private Vector2 centerVector = new Vector2(0.125f, 0.125f);
@@ -91,15 +86,13 @@ public class Tetromino : MonoBehaviour
                 gridPositions[x + 4 * y] = new Vector2(-0.25f + x * 0.25f, -0.25f + y * 0.25f) + centerVector;
             }
         }
-
-        checkObject = blocks[0]; // 센터 오브젝트 임의 지정
     }
 
     private void FixedUpdate()
     {
         dropTimer += Time.fixedDeltaTime;
 
-        if (allowMove && IsVaildPosition() && dropTimer > 0.25f)
+        if (allowMove && dropTimer > 0.25f)
         {
             dropTimer = 0f;
             transform.Translate(Vector2.down * DropScale);
@@ -156,21 +149,6 @@ public class Tetromino : MonoBehaviour
             obj.transform.localPosition = gridPositions[ints[index]];
             index++;
         }
-
-        checkObject = blocks[0];
-    }
-
-    /// <summary>
-    /// 블록이 존재할 수 있는 공간인지 확인하는 함수 (카메라 안 = 존재가능, 그 외 = false)
-    /// </summary>
-    /// <returns></returns>
-    private bool IsVaildPosition()
-    {
-        Vector2 currnetPosition = transform.localPosition + (checkObject.transform.localPosition - (Vector3)centerVector);
-        return (currnetPosition.x < boardWidth
-                && currnetPosition.x > 0 
-                && currnetPosition.y < boardHeight + 2f
-                && currnetPosition.y > 0);
     }
 
     /// <summary>
@@ -188,9 +166,17 @@ public class Tetromino : MonoBehaviour
     /// <param name="inputVec">인풋 값</param>
     public void MoveObjet(Vector2 inputVec)
     {
-        //if (!IsVaildPosition()) return;
 
         transform.Translate(inputVec * 0.25f);
+    }
+
+    /// <summary>
+    /// 테트리스 블록을 반환하는 함수
+    /// </summary>
+    /// <returns></returns>
+    public GameObject[] GetBlocks()
+    {
+        return blocks;
     }
 
     /// <summary>
