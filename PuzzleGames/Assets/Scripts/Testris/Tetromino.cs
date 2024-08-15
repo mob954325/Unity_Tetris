@@ -45,7 +45,7 @@ public class Tetromino : MonoBehaviour
     private Vector2 centerVector = new Vector2(0.125f, 0.125f);
 
     /// <summary>
-    /// 떨어지는 값 크기 (0.25 == 한 칸)
+    /// 떨어지는 값 크기 (0.25 == 한 칸), 블록 오브젝트의 크기
     /// </summary>
     private const float DropScale = 0.25f;
 
@@ -166,7 +166,25 @@ public class Tetromino : MonoBehaviour
     /// <param name="inputVec">인풋 값</param>
     public void MoveObjet(Vector2 inputVec)
     {
+        // 블록이 위로 올라가는 것 방지
+        if(inputVec.y > 0)
+        {
+            inputVec.y = 0;
+        }
 
+        foreach(var obj in blocks) // 모든 블록 체크
+        {
+            Vector2 worldVec = transform.localPosition + obj.transform.localPosition; // Tetromino 오브젝트 기준의 블록 중앙 위치 값
+
+            // 위치 벗어나는 것 방지 코드
+            if((inputVec.x < 0f && worldVec.x < centerVector.x + 0.1f) || (inputVec.x > 0f && worldVec.x >= boardWidth - 0.25f)) 
+                return;
+            if(inputVec.y < 0f && (worldVec.y < centerVector.x + 0.1f)) 
+                return;
+        }
+
+
+        // 블록 움직이기
         transform.Translate(inputVec * 0.25f);
     }
 

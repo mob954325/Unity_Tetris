@@ -9,6 +9,11 @@ public class TetrisBoard : MonoBehaviour
     // 한 줄 체크
 
     /// <summary>
+    /// 플레이어 인풋 (플레이어)
+    /// </summary>
+    PlayerInput player;
+
+    /// <summary>
     /// 스폰 위치 트랜스폼
     /// </summary>
     private Transform spawnPoint;
@@ -26,6 +31,11 @@ public class TetrisBoard : MonoBehaviour
     public Tetromino currentTetromino;
 
     /// <summary>
+    /// 보드 셀 배열 (테트리스 블록 오브젝트 확인용)
+    /// </summary>
+    private Cell[] cells;
+
+    /// <summary>
     /// 보드 넓이
     /// </summary>
     public float boardWidth;
@@ -35,13 +45,14 @@ public class TetrisBoard : MonoBehaviour
     /// </summary>
     public float boardHeight;
 
-    /// <summary>
-    /// 보드 셀 배열 (테트리스 블록 오브젝트 확인용)
-    /// </summary>
-    private Cell[] cells;
+    private float inputTimer;
+
+    private const float InputDelay = 0.1f;
 
     private void Awake()
     {
+        player = FindAnyObjectByType<PlayerInput>();
+
         Transform child = transform.GetChild(0);
 
         boardWidth = child.GetChild(0).transform.localScale.x;
@@ -56,12 +67,21 @@ public class TetrisBoard : MonoBehaviour
 
     private void FixedUpdate()
     {
+        inputTimer += Time.fixedDeltaTime;
+
         if (currentTetromino != null)
         {
-            if(!IsVaildPosition())
+            if(IsVaildPosition())
+            {
+                if(inputTimer > InputDelay)
+                {
+                    inputTimer = 0f;
+                    currentTetromino.MoveObjet(player.GetInputVec());
+                }
+            }
+            else
             {
                 currentTetromino.SetMoveAllow(false);
-                // 새로 생성
             }
         }
     }
@@ -113,10 +133,17 @@ public class TetrisBoard : MonoBehaviour
         bool result = true;
         foreach(var obj in currentTetromino.GetBlocks())
         {
-            Vector2Int grid = WorldToGrid(obj.transform.parent.localPosition + obj.transform.localPosition);
+            Vector2 world = obj.transform.parent.localPosition + obj.transform.localPosition;
+            Vector2Int grid = WorldToGrid(world);
 
-            Debug.Log($"{obj.gameObject.name} : {grid}");
-            if(grid.x < 1 || grid.x > boardWidth / 0.25f || grid.y < 1 || grid.y > boardHeight / 0.25f + 5)
+            Debug.Log(grid.x);
+
+            // 범위를 벗어 날 때
+            if (grid.x < 1 || grid.x > boardWidth / 0.25f) // 좌측 하단 (1,1) 시작
+            {
+                result = false;
+            }
+            if(grid.y < 2 || grid.y > boardHeight / 0.25f + 5)
             {
                 result = false;
             }
@@ -129,6 +156,6 @@ public class TetrisBoard : MonoBehaviour
     // 좌표 변환 ===================================================================================
     public Vector2Int WorldToGrid(Vector2 world)
     {
-        return new Vector2Int((int)(world.x / 0.25f), (int)(world.y / 0.25f)); // 2D 프로젝트이여서 월드의 x y값 사용
+        return new Vector2Int(Mathf.CeilToInt(world.x / 0.25f + 0.01f), Mathf.CeilToInt(world.y / 0.25f + 0.01f)); // 2D 프로젝트이여서 월드의 x y값 사용
     }
 }
