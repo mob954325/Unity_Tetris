@@ -28,14 +28,15 @@ public class Cell
     public void SetBlockObject(GameObject obj)
     {
         currnetBlockObject = obj;
+        isVaild = false;
     }
 
     /// <summary>
-    /// 유요하지 않는 Cell로 변경 하는 함수 
+    /// SetVaild 변경 함수
     /// </summary>
-    public void SetUnVaild()
+    public void SetVaild(bool value)
     {
-        isVaild = false;
+        isVaild = value;
     }
 
     /// <summary>

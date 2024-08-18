@@ -11,6 +11,7 @@ public class PlayerInput : MonoBehaviour
     // asd = 블록 조작 (꾹 누르면 계속 이동)
     // space(doubleTap) = 블록 드랍
 
+    Player player;
     PlayerInputAction playerInputAction;
 
     /// <summary>
@@ -18,10 +19,14 @@ public class PlayerInput : MonoBehaviour
     /// </summary>
     private Vector2 inputVec = Vector2.zero;
 
+    /// <summary>
+    /// 인풋 권한이 있는지 확인 변수
+    /// </summary>
     public bool allowInput = false;
 
     private void Awake()
     {
+        player = GetComponent<Player>();
         playerInputAction = new PlayerInputAction();
     }
 
@@ -29,7 +34,6 @@ public class PlayerInput : MonoBehaviour
     {
         playerInputAction.Enable();
 
-        playerInputAction.Player.Move.started += OnBlockMoveStart;
         playerInputAction.Player.Move.performed += OnBlockMove;
         playerInputAction.Player.Move.canceled += OnBlockMove;
 
@@ -40,7 +44,6 @@ public class PlayerInput : MonoBehaviour
 
     private void OnDisable()
     {
-        playerInputAction.Player.Move.started -= OnBlockMoveStart;
         playerInputAction.Player.Move.performed -= OnBlockMove;
         playerInputAction.Player.Move.canceled -= OnBlockMove;
 
@@ -52,27 +55,12 @@ public class PlayerInput : MonoBehaviour
 
     private void OnDrop(InputAction.CallbackContext context)
     {
-    }
-
-    private void OnBlockMoveStart(InputAction.CallbackContext context)
-    {
-
+        player.OnSpace?.Invoke();
     }
 
     private void OnBlockMove(InputAction.CallbackContext context)
     {
         inputVec = context.ReadValue<Vector2>();
-    }
-
-    private void OnBlockMoveEnd(InputAction.CallbackContext context)
-    {
-    }
-
-    /// <summary>
-    /// 인풋 벡터 반환 함수
-    /// </summary>
-    public Vector2 GetInputVec()
-    {
-        return inputVec;
+        player.GetPlayerTetromino().MoveObjet(inputVec);
     }
 }

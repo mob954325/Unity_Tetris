@@ -21,23 +21,22 @@ public class Tetromino : MonoBehaviour
         get => type;
         set
         {
-            if (type != value)
+            type = value;
+            if (type != ShapeType.None)
             {
-                type = value;
                 MakeShape();
             }
         }
     }
-
-    /// <summary>
-    /// 블록 그리드 위치 저장 배열 (4x4)
-    /// </summary>
-    private Vector2[] gridPositions;
-
     /// <summary>
     /// 테트리스 블록 배열
     /// </summary>
     private GameObject[] blocks;
+
+    /// <summary>
+    /// 블록 모양 생성용 그리드 위치 저장 배열 (4x4)
+    /// </summary>
+    private Vector2[] gridPositions;
 
     /// <summary>
     /// 중심 값 벡터
@@ -45,24 +44,24 @@ public class Tetromino : MonoBehaviour
     private Vector2 centerVector = new Vector2(0.125f, 0.125f);
 
     /// <summary>
+    /// 이전 위치 벡터
+    /// </summary>
+    public Vector2 prevVector = Vector2.zero;
+
+    /// <summary>
     /// 떨어지는 값 크기 (0.25 == 한 칸), 블록 오브젝트의 크기
     /// </summary>
     private const float DropScale = 0.25f;
 
     /// <summary>
-    /// 보드 넓이
-    /// </summary>
-    private float boardWidth;
-
-    /// <summary>
-    /// 보드 높이
-    /// </summary>
-    private float boardHeight;
-
-    /// <summary>
     /// 다음 칸으로 떨어지는데 걸리는 시간 타이머 (시간이 되면 초기화 후 위치변경)
     /// </summary>
     private float dropTimer = 0f;
+
+    /// <summary>
+    /// 블록이 멈춰있을 때 활성화되는 타이머 (일정 시간이 지나면 블록 멈춤)
+    /// </summary>
+    private float stopTimer = 1f;
 
     /// <summary>
     /// 움직일 수 있는지 체크하는 변수 (움직일 수 있으면 true 아니면 false)
@@ -92,10 +91,31 @@ public class Tetromino : MonoBehaviour
     {
         dropTimer += Time.fixedDeltaTime;
 
+        if((Vector3)prevVector != transform.localPosition)
+        {
+            stopTimer = 1f; // 1초 대기
+            prevVector = transform.localPosition;
+        }
+        
         if (allowMove && dropTimer > 0.25f)
         {
             dropTimer = 0f;
             transform.Translate(Vector2.down * DropScale);
+        }
+
+        CheckIsStop();
+    }
+
+    /// <summary>
+    /// 블록이 멈췄는지 확인하는 함수 (물리업데이트 함수)
+    /// </summary>
+    private void CheckIsStop()
+    {
+        stopTimer -= Time.fixedDeltaTime;
+
+        if(stopTimer < 0f)
+        {
+            allowMove = false;
         }
     }
 
@@ -105,13 +125,11 @@ public class Tetromino : MonoBehaviour
     /// <param name="type">블록 타입</param>
     /// <param name="width">보드 넓이</param>
     /// <param name="height">보드 높이</param>
-    public void Init(ShapeType type, float width, float height)
+    public void Init(ShapeType type)
     {
         Type = type;
-        boardHeight = height;
-        boardWidth = width;
-
         allowMove = true;
+        SetRandomColor();
     }
     
     /// <summary>
@@ -139,6 +157,13 @@ public class Tetromino : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 블록 위치를 설정하는 함수 (gridPositions 배열 사용)
+    /// </summary>
+    /// <param name="first">첫번째 위치</param>
+    /// <param name="second">두번째 위치</param>
+    /// <param name="third">세번째 위치</param>
+    /// <param name="fourth">네번째 위치</param>
     private void SetBlockPosition(int first, int second, int third, int fourth)
     {
         int[] ints = { first, second, third, fourth };
@@ -161,6 +186,27 @@ public class Tetromino : MonoBehaviour
     }
 
     /// <summary>
+    /// allowMove 반환 함수 (움직임 권한 반환 함수)
+    /// </summary>
+    public bool checkMoveAllow()
+    {
+        return allowMove;
+    }
+
+    /// <summary>
+    /// 블록 색상 랜덤 설정 함수
+    /// </summary>
+    private void SetRandomColor()
+    {
+        float rand = Random.value;
+        foreach(var obj in blocks)
+        {
+            Material material = obj.GetComponent<SpriteRenderer>().material;
+            material.color = new Color(rand, rand, rand);
+        }
+    }
+
+    /// <summary>
     /// 오브젝트 움직이는 함수
     /// </summary>
     /// <param name="inputVec">인풋 값</param>
@@ -172,19 +218,7 @@ public class Tetromino : MonoBehaviour
             inputVec.y = 0;
         }
 
-        foreach(var obj in blocks) // 모든 블록 체크
-        {
-            Vector2 worldVec = transform.localPosition + obj.transform.localPosition; // Tetromino 오브젝트 기준의 블록 중앙 위치 값
-
-            // 위치 벗어나는 것 방지 코드
-            if((inputVec.x < 0f && worldVec.x < centerVector.x + 0.1f) || (inputVec.x > 0f && worldVec.x >= boardWidth - 0.25f)) 
-                return;
-            if(inputVec.y < 0f && (worldVec.y < centerVector.x + 0.1f)) 
-                return;
-        }
-
-
-        // 블록 움직이기
+        // 블록 움직이기 (한칸)
         transform.Translate(inputVec * 0.25f);
     }
 
@@ -202,6 +236,16 @@ public class Tetromino : MonoBehaviour
     /// </summary>
     public void RotateObject()
     {
+        transform.Rotate(Vector3.forward * 90f);
+    }
 
+    /// <summary>
+    /// 오브젝트 드랍 함수
+    /// </summary>
+    /// <param name="dropPosition">고정될 위치
+    /// </param>
+    public void DropObject(Vector2 dropPosition)
+    {
+        transform.localPosition = dropPosition;
     }
 }
