@@ -61,6 +61,9 @@ public class PlayerInput : MonoBehaviour
     private void OnBlockMove(InputAction.CallbackContext context)
     {
         inputVec = context.ReadValue<Vector2>();
-        player.GetPlayerTetromino().MoveObjet(inputVec);
+        if(inputVec.x < -0.9f || inputVec.x > 0.9f || inputVec.y > 0.9f || inputVec.y < -0.9f) // 대각선 방지
+        {
+            player.GetPlayerTetromino().MoveObjet(inputVec);
+        }
     }
 }

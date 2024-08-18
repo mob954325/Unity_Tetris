@@ -77,16 +77,15 @@ public class TetrisBoard : MonoBehaviour
 
         if(player.currentTetromino != null)
         {
-            if(!player.currentTetromino.checkMoveAllow())
+            if(!player.currentTetromino.checkMoveAllow()) // 해당 블록위치 셀에 저장
             {
                 // 블록 새로 만들고
-                // 해당 블록위치 셀에 저장
                 int index = 0;
                 foreach(var obj in player.currentTetromino.GetBlocks())
                 {
                     Vector2Int grid = WorldToGrid(player.currentTetromino.transform.localPosition + obj.transform.localPosition);
                     Debug.Log(grid);
-                    cells[grid.y, grid.x].SetBlockObject(obj);
+                    cells[grid.y - 1, grid.x - 1].SetBlockObject(obj);
                 }
             }
         }
@@ -173,14 +172,13 @@ public class TetrisBoard : MonoBehaviour
         {
             Vector2 pos = obj.transform.localPosition + curBlock.transform.localPosition; // 한 블록의 월드상 위치
             Vector2Int grid = WorldToGrid(pos);
-            //Debug.Log($"{obj.name} : {pos}");
             // 해당위치에 블록이 있는지 확인
             if (grid.x > 0 && grid.y > 0 && grid.x < count_x && grid.y < count_y)
             {
-                if (!cells[grid.y, grid.x].CheckVaild())
+                if (!cells[grid.y - 1, grid.x - 1].CheckVaild())
                 {
-                    Debug.Log(curBlock.prevVector);
                     curBlock.transform.localPosition = curBlock.prevVector;
+                    curBlock.SetMoveAllow(false);
                 }
             }
 
@@ -220,13 +218,17 @@ public class TetrisBoard : MonoBehaviour
                 {
                     case 0: // x가 0보다 작음
                         curTetromino.transform.localPosition = new Vector2(0, curTetromino.transform.localPosition.y);
+                        if (curTetromino.transform.localPosition.x + curBlock.transform.localPosition.x < 0)
+                            curTetromino.transform.localPosition += Vector3.right * 0.25f;
                         break;
-                    case 1: // x가 0보다 큼
+                    case 1: // x가 boardWidth 보다 큼
                         curTetromino.transform.localPosition = new Vector2(boardWidth - 0.25f, curTetromino.transform.localPosition.y);
-                        break;
+                        if (curTetromino.transform.localPosition.x + curBlock.transform.localPosition.x > boardWidth - 0.25f)
+                            curTetromino.transform.localPosition += Vector3.left * 0.25f;
+                            break;
                     case 2: // y가 0보다 작음
                         curTetromino.transform.localPosition = new Vector2(curTetromino.transform.localPosition.x, 0);
-                        if (curBlock.transform.localPosition.y < 0)
+                        if (curTetromino.transform.localPosition.y + curBlock.transform.localPosition.y < 0)
                             curTetromino.transform.localPosition += Vector3.up * 0.25f;
                         break;
                 }

@@ -94,12 +94,12 @@ public class Tetromino : MonoBehaviour
         if((Vector3)prevVector != transform.localPosition)
         {
             stopTimer = 1f; // 1초 대기
-            prevVector = transform.localPosition;
         }
-        
+
         if (allowMove && dropTimer > 0.25f)
         {
             dropTimer = 0f;
+            prevVector = transform.localPosition;
             transform.Translate(Vector2.down * DropScale);
         }
 
@@ -219,6 +219,7 @@ public class Tetromino : MonoBehaviour
         }
 
         // 블록 움직이기 (한칸)
+        prevVector = transform.localPosition;
         transform.Translate(inputVec * 0.25f);
     }
 
