@@ -32,6 +32,22 @@ public class Cell
     }
 
     /// <summary>
+    /// 해당 셀의 정보를 제거하는 함수 (블록 제거)
+    /// </summary>
+    /// <param name="activeSelf">블록 오브젝트 활성화 여부 (default : false)</param>
+    public void RemoveBlockObject(bool activeSelf = false)
+    {
+        currnetBlockObject.SetActive(activeSelf);
+        currnetBlockObject = null;
+        isVaild = true;
+    }
+
+    public GameObject GetBlockObject()
+    {
+        return currnetBlockObject;
+    }
+
+    /// <summary>
     /// SetVaild 변경 함수
     /// </summary>
     public void SetVaild(bool value)

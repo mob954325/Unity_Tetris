@@ -73,24 +73,29 @@ public class TetrisBoard : MonoBehaviour
 
     private void Update()
     {
-        CheckAllBlockIsVaild();
-
         if(player.currentTetromino != null)
         {
             if(!player.currentTetromino.checkMoveAllow()) // 해당 블록위치 셀에 저장
             {
                 // 블록 새로 만들고
-                int index = 0;
                 foreach(var obj in player.currentTetromino.GetBlocks())
                 {
                     Vector2Int grid = WorldToGrid(player.currentTetromino.transform.localPosition + obj.transform.localPosition);
-                    Debug.Log(grid);
-                    cells[grid.y - 1, grid.x - 1].SetBlockObject(obj);
+                    Debug.Log($"{obj.name} {grid.x} , {grid.y}");
+                    cells[grid.y, grid.x].SetBlockObject(obj);
                 }
+
+                // 한 줄 체크
+                CheckHorizontal();
             }
         }
-    }
 
+        CheckAllBlockIsVaild();
+    }
+    
+    /// <summary>
+    /// 초기화 함수
+    /// </summary>
     public void Init()
     {
         count_x = (int)(boardWidth / 0.25f);
@@ -131,32 +136,6 @@ public class TetrisBoard : MonoBehaviour
     }
 
     /// <summary>
-    /// 블록이 존재하는 위치에 있는지 확인하는 함수 (업데이트 함수)
-    /// </summary>
-    private void CheckVaildPosition()
-    {
-        if (player.currentTetromino == null)
-            return;
-
-        Tetromino curBlock = player.currentTetromino;
-        // 컨테이너 오브젝트는 (0,0) 이므로 고려 안하고 작성
-        if (curBlock.transform.localPosition.x < 0) // x가 0보다 작으면
-        {
-            curBlock.transform.localPosition = new Vector2(0, curBlock.transform.localPosition.y);
-        }
-
-        if(curBlock.transform.localPosition.x > boardWidth) // x가 보드 최대값 보다 높으면
-        {
-            curBlock.transform.localPosition = new Vector2(boardWidth - 0.25f, curBlock.transform.localPosition.y);
-        }
-
-        if(curBlock.transform.localPosition.y < 0) // y가 0보다 작으면
-        {
-            curBlock.transform.localPosition = new Vector2(curBlock.transform.localPosition.x, 0);
-        }
-    }
-
-    /// <summary>
     /// 모든 블록이 조건 내에 존재할 수 있는지 확인하는 함수 (블록이 겹치지 않았는지 보드 내에 있는지 확인)
     /// </summary>
     /// <returns>만족하면 true 아니면 false</returns>
@@ -173,9 +152,9 @@ public class TetrisBoard : MonoBehaviour
             Vector2 pos = obj.transform.localPosition + curBlock.transform.localPosition; // 한 블록의 월드상 위치
             Vector2Int grid = WorldToGrid(pos);
             // 해당위치에 블록이 있는지 확인
-            if (grid.x > 0 && grid.y > 0 && grid.x < count_x && grid.y < count_y)
+            if (grid.x >= 0 && grid.y >= 0 && grid.x < count_x && grid.y < count_y) //
             {
-                if (!cells[grid.y - 1, grid.x - 1].CheckVaild())
+                if (!cells[grid.y, grid.x].CheckVaild())
                 {
                     curBlock.transform.localPosition = curBlock.prevVector;
                     curBlock.SetMoveAllow(false);
@@ -207,6 +186,12 @@ public class TetrisBoard : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 블록 위치 조정하는 함수 (CheckAllBlockIsVaild 함수용)
+    /// </summary>
+    /// <param name="curTetromino">테트리스 블록</param>
+    /// <param name="curBlock">현재 체크하고 있는 테트리스 블록의 자식 블록</param>
+    /// <param name="condition">현재 블록 상태</param>
     private void SetBlockByCondition(Tetromino curTetromino, GameObject curBlock, int condition)
     {
         int mask = 1;
@@ -237,11 +222,60 @@ public class TetrisBoard : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 가로줄 체크 함수
+    /// </summary>
+    private void CheckHorizontal()
+    {
+        // 한줄 체크
+        for(int y = 0; y < count_y; y++)
+        {
+            int count = 0; // y줄의 x블록 개수
+            for(int x = 0; x < count_x; x++)
+            {
+                if (!cells[y,x].CheckVaild())
+                {
+                    count++;
+                }
+            }
+
+            // 해당 줄에 모든 블록이 존재하면 제거 (1줄 제거)
+            if (count >= count_x)
+            {
+                for(int i = 0; i < count_x; i++)
+                {
+                    cells[y, i].RemoveBlockObject();
+                    DownOneBlock(i, y);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 블록 한 칸 내리기
+    /// </summary>
+    private void DownOneBlock(int gridX, int gridY)
+    {
+        int checkHeight = gridY + 1;
+        while(checkHeight < count_y)
+        {
+            if (!cells[checkHeight, gridX].CheckVaild()) // 해당 위치에 블록이 없으면 종료
+            {
+                GameObject upperObject = cells[checkHeight, gridX].GetBlockObject();
+                upperObject.transform.localPosition = new Vector2(upperObject.transform.localPosition.x, upperObject.transform.localPosition.y - 0.25f); // 위치 내림
+                cells[checkHeight - 1, gridX].SetBlockObject(upperObject);  // 셀 재설정
+                cells[checkHeight, gridX].RemoveBlockObject(true);          // 기존에 있던 셀 정보 제거
+            }
+
+            checkHeight++;
+        }
+    }
+
     // 좌표 변환 ===================================================================================
 
     public Vector2Int WorldToGrid(Vector2 world)
     {
-        return new Vector2Int(Mathf.CeilToInt(world.x / 0.25f + 0.01f), Mathf.CeilToInt(world.y / 0.25f + 0.01f)); // 2D 프로젝트이여서 월드의 x y값 사용
+        return new Vector2Int(Mathf.CeilToInt(world.x / 0.25f + 0.01f) - 1, Mathf.CeilToInt(world.y / 0.25f + 0.01f) - 1); // 2D 프로젝트이여서 월드의 x y값 사용
     }
 
     public Vector2 GridToWorld(Vector2Int grid)
