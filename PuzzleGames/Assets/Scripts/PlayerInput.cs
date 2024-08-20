@@ -39,11 +39,14 @@ public class PlayerInput : MonoBehaviour
 
         playerInputAction.Player.Drop.performed += OnDrop;
         playerInputAction.Player.Drop.canceled += OnDrop;
-    }
 
+        playerInputAction.Player.Rotate.performed += OnRotate;
+    }
 
     private void OnDisable()
     {
+        playerInputAction.Player.Rotate.performed -= OnRotate;
+
         playerInputAction.Player.Move.performed -= OnBlockMove;
         playerInputAction.Player.Move.canceled -= OnBlockMove;
 
@@ -56,6 +59,11 @@ public class PlayerInput : MonoBehaviour
     private void OnDrop(InputAction.CallbackContext context)
     {
         player.OnSpace?.Invoke();
+    }
+
+    private void OnRotate(InputAction.CallbackContext context)
+    {
+        player.OnKey_R?.Invoke();
     }
 
     private void OnBlockMove(InputAction.CallbackContext context)

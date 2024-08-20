@@ -595,7 +595,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72f634769f92aa3489a514af43fe0216, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 5
+  type: 2
   board: {fileID: 1569073220}
 --- !u!1 &1748257836
 GameObject:

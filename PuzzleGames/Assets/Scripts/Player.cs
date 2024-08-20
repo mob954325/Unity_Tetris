@@ -15,9 +15,15 @@ public class Player : MonoBehaviour
     /// </summary>
     public Action OnSpace;
 
-    private void Awake()
+    /// <summary>
+    /// R키 눌렀을 때 호출되는 델리게이트
+    /// </summary>
+    public Action OnKey_R;
+
+    public void Init()
     {
-        
+        OnSpace = DropTetromino;
+        OnKey_R = RotateTetromino;
     }
 
     /// <summary>
@@ -27,6 +33,11 @@ public class Player : MonoBehaviour
     {
         // 블록 드랍
         currentTetromino.DropObject(currentTetromino.transform.localPosition * Vector2.right); // 위치 임시 설정
+    }
+
+    private void RotateTetromino()
+    {
+        currentTetromino.RotateObject();
     }
 
     /// <summary>

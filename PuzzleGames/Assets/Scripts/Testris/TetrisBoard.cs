@@ -127,12 +127,13 @@ public class TetrisBoard : MonoBehaviour
     {
         Tetromino tetromino = Instantiate(tetrominoPrefab).GetComponent<Tetromino>();
         tetromino.transform.parent = tetrominoContainer;
-        tetromino.transform.localPosition = spawnPoint.transform.localPosition;
+        tetromino.transform.localPosition = spawnPoint.transform.localPosition; //
         tetromino.gameObject.name = $"Tetromino_{type}";
 
         tetromino.Init(type);
 
         player.currentTetromino = tetromino; // 임시
+        player.Init();
     }
 
     /// <summary>
@@ -151,8 +152,10 @@ public class TetrisBoard : MonoBehaviour
         {
             Vector2 pos = obj.transform.localPosition + curBlock.transform.localPosition; // 한 블록의 월드상 위치
             Vector2Int grid = WorldToGrid(pos);
+
+            Debug.Log($"{obj.gameObject.name} : {pos} {grid}");
             // 해당위치에 블록이 있는지 확인
-            if (grid.x >= 0 && grid.y >= 0 && grid.x < count_x && grid.y < count_y) //
+            if (grid.x >= 0 && grid.y >= 0 && grid.x < count_x && grid.y < count_y + 5f) //
             {
                 if (!cells[grid.y, grid.x].CheckVaild())
                 {

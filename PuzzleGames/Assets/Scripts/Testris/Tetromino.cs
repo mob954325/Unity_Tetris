@@ -9,11 +9,22 @@ public enum ShapeType
     I,
     L,
     T,
-    S
+    S,
+    Z
 }
 
 public class Tetromino : MonoBehaviour
 {
+    /// <summary>
+    /// 회전 모양 저장용 딕셔너리
+    /// </summary>
+    Dictionary<ShapeType, int[,]> RotateShape = new Dictionary<ShapeType, int[,]>();
+
+    /// <summary>
+    /// 회전 인덱스
+    /// </summary>
+    int rotateIndex = 0;
+
     public ShapeType type = ShapeType.None;
 
     private ShapeType Type
@@ -35,6 +46,10 @@ public class Tetromino : MonoBehaviour
 
     /// <summary>
     /// 블록 모양 생성용 그리드 위치 저장 배열 (4x4)
+    /// 12 13 14 15
+    /// 8 9 10 11
+    /// 4 5 6 7
+    /// 0 1 2 3
     /// </summary>
     private Vector2[] gridPositions;
 
@@ -96,11 +111,11 @@ public class Tetromino : MonoBehaviour
             stopTimer = 1f; // 1초 대기
         }
 
-        if (allowMove && dropTimer > 0.25f)
+        if (allowMove && dropTimer > 0.5f)
         {
             dropTimer = 0f;
             prevVector = transform.localPosition;
-            transform.Translate(Vector2.down * DropScale);
+            transform.Translate(Vector2.down * DropScale, Space.World);
         }
 
         CheckIsStop();
@@ -130,6 +145,55 @@ public class Tetromino : MonoBehaviour
         Type = type;
         allowMove = true;
         SetRandomColor();
+        SetRotateShape();
+    }
+
+    private void SetRotateShape()
+    {
+        RotateShape.Add(ShapeType.O, new int[,]
+        {
+            { 5, 6, 9, 10},
+        });
+
+        RotateShape.Add(ShapeType.I, new int[,]
+        {
+            { 1, 5, 9, 13  },
+            { 4, 5, 6, 7   },
+            { 2, 6, 10, 14 },
+            { 4, 5, 6, 7   }
+        });
+
+        RotateShape.Add(ShapeType.L, new int[,]
+        {
+            { 5, 6, 9, 13  },
+            { 8, 9, 10, 14 },
+            { 5, 9, 12, 13 },
+            { 4, 8, 9, 10  }
+        });
+
+        RotateShape.Add(ShapeType.T, new int[,]
+        {
+            { 4, 5, 6, 9 },
+            { 1, 4, 5, 9 },
+            { 1, 4, 5, 6 },
+            { 1, 5, 6, 9 }
+        });
+
+        RotateShape.Add(ShapeType.S, new int[,]
+        {
+            { 4, 5, 9, 10 },
+            { 2, 6, 5, 9  },
+            { 4, 5, 9, 10 },
+            { 1, 4, 5, 8  }
+        });
+
+        RotateShape.Add(ShapeType.Z, new int[,]
+        {
+            { 5, 6, 8, 9  },
+            { 0, 4, 5, 9  },
+            { 5, 6, 8, 9  },
+            { 1, 5, 6, 10 }
+        });
     }
     
     /// <summary>
@@ -153,6 +217,9 @@ public class Tetromino : MonoBehaviour
                 break;
             case ShapeType.S: // 4 5 9 10
                 SetBlockPosition(4, 5, 9, 10);
+                break;
+            case ShapeType.Z: // 5 6 8 9
+                SetBlockPosition(5, 6, 8, 9);
                 break;
         }
     }
@@ -220,7 +287,7 @@ public class Tetromino : MonoBehaviour
 
         // 블록 움직이기 (한칸)
         prevVector = transform.localPosition;
-        transform.Translate(inputVec * 0.25f);
+        transform.Translate(inputVec * 0.25f, Space.World);
     }
 
     /// <summary>
@@ -237,7 +304,14 @@ public class Tetromino : MonoBehaviour
     /// </summary>
     public void RotateObject()
     {
-        transform.Rotate(Vector3.forward * 90f);
+        if (Type == ShapeType.O) // O 모양은 회전 안함
+            return;
+
+        rotateIndex++;
+        rotateIndex %= 4;
+
+        RotateShape.TryGetValue(Type, out int[,] result);
+        SetBlockPosition(result[rotateIndex, 0], result[rotateIndex, 1], result[rotateIndex, 2], result[rotateIndex, 3]);
     }
 
     /// <summary>
