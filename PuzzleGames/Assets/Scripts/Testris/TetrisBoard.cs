@@ -81,7 +81,6 @@ public class TetrisBoard : MonoBehaviour
                 foreach(var obj in player.currentTetromino.GetBlocks())
                 {
                     Vector2Int grid = WorldToGrid(player.currentTetromino.transform.localPosition + obj.transform.localPosition);
-                    Debug.Log($"{obj.name} {grid.x} , {grid.y}");
                     cells[grid.y, grid.x].SetBlockObject(obj);
                 }
 
@@ -153,7 +152,6 @@ public class TetrisBoard : MonoBehaviour
             Vector2 pos = obj.transform.localPosition + curBlock.transform.localPosition; // 한 블록의 월드상 위치
             Vector2Int grid = WorldToGrid(pos);
 
-            Debug.Log($"{obj.gameObject.name} : {pos} {grid}");
             // 해당위치에 블록이 있는지 확인
             if (grid.x >= 0 && grid.y >= 0 && grid.x < count_x && grid.y < count_y + 5f) //
             {
@@ -207,17 +205,30 @@ public class TetrisBoard : MonoBehaviour
                     case 0: // x가 0보다 작음
                         curTetromino.transform.localPosition = new Vector2(0, curTetromino.transform.localPosition.y);
                         if (curTetromino.transform.localPosition.x + curBlock.transform.localPosition.x < 0)
-                            curTetromino.transform.localPosition += Vector3.right * 0.25f;
+                        {
+                            float gap = curTetromino.transform.localPosition.x + curBlock.transform.localPosition.x - 0.125f;
+                            curTetromino.transform.localPosition = new Vector2(curTetromino.transform.localPosition.x - gap, curTetromino.transform.localPosition.y);
+                        }
+                        //curTetromino.transform.localPosition += Vector3.right * 0.25f;                            
                         break;
                     case 1: // x가 boardWidth 보다 큼
                         curTetromino.transform.localPosition = new Vector2(boardWidth - 0.25f, curTetromino.transform.localPosition.y);
                         if (curTetromino.transform.localPosition.x + curBlock.transform.localPosition.x > boardWidth - 0.25f)
-                            curTetromino.transform.localPosition += Vector3.left * 0.25f;
-                            break;
+                        {
+                            float gap = (boardWidth - 0.25f) - (curTetromino.transform.localPosition.x + curBlock.transform.localPosition.x - 0.125f);
+                            Debug.Log(gap);
+                            curTetromino.transform.localPosition = new Vector2(curTetromino.transform.localPosition.x + gap, curTetromino.transform.localPosition.y);
+                        }
+                        //curTetromino.transform.localPosition += Vector3.left * 0.25f;
+                        break;
                     case 2: // y가 0보다 작음
                         curTetromino.transform.localPosition = new Vector2(curTetromino.transform.localPosition.x, 0);
                         if (curTetromino.transform.localPosition.y + curBlock.transform.localPosition.y < 0)
-                            curTetromino.transform.localPosition += Vector3.up * 0.25f;
+                        {
+                            float gap = curTetromino.transform.localPosition.y + curBlock.transform.localPosition.y - 0.125f;
+                            curTetromino.transform.localPosition = new Vector2(curTetromino.transform.localPosition.x, curTetromino.transform.localPosition.y - gap);
+                        }
+                        //curTetromino.transform.localPosition += Vector3.up * 0.25f;
                         break;
                 }
             }
