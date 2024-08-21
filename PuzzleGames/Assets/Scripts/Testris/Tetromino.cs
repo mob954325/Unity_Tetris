@@ -16,12 +16,12 @@ public enum ShapeType
 public class Tetromino : MonoBehaviour
 {
     /// <summary>
-    /// È¸Àü ¸ğ¾ç ÀúÀå¿ë µñ¼Å³Ê¸®
+    /// íšŒì „ ëª¨ì–‘ ì €ì¥ìš© ë”•ì…”ë„ˆë¦¬
     /// </summary>
     Dictionary<ShapeType, int[,]> RotateShape = new Dictionary<ShapeType, int[,]>();
 
     /// <summary>
-    /// È¸Àü ÀÎµ¦½º
+    /// íšŒì „ ì¸ë±ìŠ¤
     /// </summary>
     int rotateIndex = 0;
 
@@ -40,12 +40,12 @@ public class Tetromino : MonoBehaviour
         }
     }
     /// <summary>
-    /// Å×Æ®¸®½º ºí·Ï ¹è¿­
+    /// í…ŒíŠ¸ë¦¬ìŠ¤ ë¸”ë¡ ë°°ì—´
     /// </summary>
     private GameObject[] blocks;
 
     /// <summary>
-    /// ºí·Ï ¸ğ¾ç »ı¼º¿ë ±×¸®µå À§Ä¡ ÀúÀå ¹è¿­ (4x4)
+    /// ë¸”ë¡ ëª¨ì–‘ ìƒì„±ìš© ê·¸ë¦¬ë“œ ìœ„ì¹˜ ì €ì¥ ë°°ì—´ (4x4)
     /// 12 13 14 15
     /// 8 9 10 11
     /// 4 5 6 7
@@ -54,32 +54,32 @@ public class Tetromino : MonoBehaviour
     private Vector2[] gridPositions;
 
     /// <summary>
-    /// Áß½É °ª º¤ÅÍ
+    /// ì¤‘ì‹¬ ê°’ ë²¡í„°
     /// </summary>
     private Vector2 centerVector = new Vector2(0.125f, 0.125f);
 
     /// <summary>
-    /// ÀÌÀü À§Ä¡ º¤ÅÍ
+    /// ì´ì „ ìœ„ì¹˜ ë²¡í„°
     /// </summary>
     public Vector2 prevVector = Vector2.zero;
 
     /// <summary>
-    /// ¶³¾îÁö´Â °ª Å©±â (0.25 == ÇÑ Ä­), ºí·Ï ¿ÀºêÁ§Æ®ÀÇ Å©±â
+    /// ë–¨ì–´ì§€ëŠ” ê°’ í¬ê¸° (0.25 == í•œ ì¹¸), ë¸”ë¡ ì˜¤ë¸Œì íŠ¸ì˜ í¬ê¸°
     /// </summary>
     private const float DropScale = 0.25f;
 
     /// <summary>
-    /// ´ÙÀ½ Ä­À¸·Î ¶³¾îÁö´Âµ¥ °É¸®´Â ½Ã°£ Å¸ÀÌ¸Ó (½Ã°£ÀÌ µÇ¸é ÃÊ±âÈ­ ÈÄ À§Ä¡º¯°æ)
+    /// ë‹¤ìŒ ì¹¸ìœ¼ë¡œ ë–¨ì–´ì§€ëŠ”ë° ê±¸ë¦¬ëŠ” ì‹œê°„ íƒ€ì´ë¨¸ (ì‹œê°„ì´ ë˜ë©´ ì´ˆê¸°í™” í›„ ìœ„ì¹˜ë³€ê²½)
     /// </summary>
     private float dropTimer = 0f;
 
     /// <summary>
-    /// ºí·ÏÀÌ ¸ØÃçÀÖÀ» ¶§ È°¼ºÈ­µÇ´Â Å¸ÀÌ¸Ó (ÀÏÁ¤ ½Ã°£ÀÌ Áö³ª¸é ºí·Ï ¸ØÃã)
+    /// ë¸”ë¡ì´ ë©ˆì¶°ìˆì„ ë•Œ í™œì„±í™”ë˜ëŠ” íƒ€ì´ë¨¸ (ì¼ì • ì‹œê°„ì´ ì§€ë‚˜ë©´ ë¸”ë¡ ë©ˆì¶¤)
     /// </summary>
     private float stopTimer = 1f;
 
     /// <summary>
-    /// ¿òÁ÷ÀÏ ¼ö ÀÖ´ÂÁö Ã¼Å©ÇÏ´Â º¯¼ö (¿òÁ÷ÀÏ ¼ö ÀÖÀ¸¸é true ¾Æ´Ï¸é false)
+    /// ì›€ì§ì¼ ìˆ˜ ìˆëŠ”ì§€ ì²´í¬í•˜ëŠ” ë³€ìˆ˜ (ì›€ì§ì¼ ìˆ˜ ìˆìœ¼ë©´ true ì•„ë‹ˆë©´ false)
     /// </summary>
     public bool allowMove = false;
 
@@ -108,7 +108,7 @@ public class Tetromino : MonoBehaviour
 
         if((Vector3)prevVector != transform.localPosition)
         {
-            stopTimer = 1f; // 1ÃÊ ´ë±â
+            stopTimer = 1f; // 1ì´ˆ ëŒ€ê¸°
         }
 
         if (allowMove && dropTimer > 0.5f)
@@ -122,7 +122,7 @@ public class Tetromino : MonoBehaviour
     }
 
     /// <summary>
-    /// ºí·ÏÀÌ ¸ØÃè´ÂÁö È®ÀÎÇÏ´Â ÇÔ¼ö (¹°¸®¾÷µ¥ÀÌÆ® ÇÔ¼ö)
+    /// ë¸”ë¡ì´ ë©ˆì·„ëŠ”ì§€ í™•ì¸í•˜ëŠ” í•¨ìˆ˜ (ë¬¼ë¦¬ì—…ë°ì´íŠ¸ í•¨ìˆ˜)
     /// </summary>
     private void CheckIsStop()
     {
@@ -135,11 +135,11 @@ public class Tetromino : MonoBehaviour
     }
 
     /// <summary>
-    /// Å×Æ®¸®½º ºí·Ï ÃÊ±âÈ­ ÇÔ¼ö
+    /// í…ŒíŠ¸ë¦¬ìŠ¤ ë¸”ë¡ ì´ˆê¸°í™” í•¨ìˆ˜
     /// </summary>
-    /// <param name="type">ºí·Ï Å¸ÀÔ</param>
-    /// <param name="width">º¸µå ³ĞÀÌ</param>
-    /// <param name="height">º¸µå ³ôÀÌ</param>
+    /// <param name="type">ë¸”ë¡ íƒ€ì…</param>
+    /// <param name="width">ë³´ë“œ ë„“ì´</param>
+    /// <param name="height">ë³´ë“œ ë†’ì´</param>
     public void Init(ShapeType type)
     {
         Type = type;
@@ -148,6 +148,9 @@ public class Tetromino : MonoBehaviour
         SetRotateShape();
     }
 
+    /// <summary>
+    /// íšŒì „ ëª¨ì–‘ ì„¤ì • í•¨ìˆ˜
+    /// </summary>
     private void SetRotateShape()
     {
         RotateShape.Add(ShapeType.O, new int[,]
@@ -197,7 +200,7 @@ public class Tetromino : MonoBehaviour
     }
     
     /// <summary>
-    /// ºí·Ï ¸¸µå´Â ÇÔ¼ö
+    /// ë¸”ë¡ ë§Œë“œëŠ” í•¨ìˆ˜
     /// </summary>
     private void MakeShape()
     {
@@ -225,12 +228,12 @@ public class Tetromino : MonoBehaviour
     }
 
     /// <summary>
-    /// ºí·Ï À§Ä¡¸¦ ¼³Á¤ÇÏ´Â ÇÔ¼ö (gridPositions ¹è¿­ »ç¿ë)
+    /// ë¸”ë¡ ìœ„ì¹˜ë¥¼ ì„¤ì •í•˜ëŠ” í•¨ìˆ˜ (gridPositions ë°°ì—´ ì‚¬ìš©)
     /// </summary>
-    /// <param name="first">Ã¹¹øÂ° À§Ä¡</param>
-    /// <param name="second">µÎ¹øÂ° À§Ä¡</param>
-    /// <param name="third">¼¼¹øÂ° À§Ä¡</param>
-    /// <param name="fourth">³×¹øÂ° À§Ä¡</param>
+    /// <param name="first">ì²«ë²ˆì§¸ ìœ„ì¹˜</param>
+    /// <param name="second">ë‘ë²ˆì§¸ ìœ„ì¹˜</param>
+    /// <param name="third">ì„¸ë²ˆì§¸ ìœ„ì¹˜</param>
+    /// <param name="fourth">ë„¤ë²ˆì§¸ ìœ„ì¹˜</param>
     private void SetBlockPosition(int first, int second, int third, int fourth)
     {
         int[] ints = { first, second, third, fourth };
@@ -244,16 +247,16 @@ public class Tetromino : MonoBehaviour
     }
 
     /// <summary>
-    /// ¿òÁ÷ÀÓ ±ÇÇÑ ¼³Á¤ ÇÔ¼ö (true : ¿òÁ÷ÀÓ °¡´É, false : ¿òÁ÷ÀÌÁö ¾ÊÀ½)
+    /// ì›€ì§ì„ ê¶Œí•œ ì„¤ì • í•¨ìˆ˜ (true : ì›€ì§ì„ ê°€ëŠ¥, false : ì›€ì§ì´ì§€ ì•ŠìŒ)
     /// </summary>
-    /// <param name="value">true ±ÇÇÑ ºÎ¿©, false ±ÇÇÑ Á¦°Å</param>
+    /// <param name="value">true ê¶Œí•œ ë¶€ì—¬, false ê¶Œí•œ ì œê±°</param>
     public void SetMoveAllow(bool value)
     {
         allowMove = value;
     }
 
     /// <summary>
-    /// allowMove ¹İÈ¯ ÇÔ¼ö (¿òÁ÷ÀÓ ±ÇÇÑ ¹İÈ¯ ÇÔ¼ö)
+    /// allowMove ë°˜í™˜ í•¨ìˆ˜ (ì›€ì§ì„ ê¶Œí•œ ë°˜í™˜ í•¨ìˆ˜)
     /// </summary>
     public bool checkMoveAllow()
     {
@@ -261,7 +264,7 @@ public class Tetromino : MonoBehaviour
     }
 
     /// <summary>
-    /// ºí·Ï »ö»ó ·£´ı ¼³Á¤ ÇÔ¼ö
+    /// ë¸”ë¡ ìƒ‰ìƒ ëœë¤ ì„¤ì • í•¨ìˆ˜
     /// </summary>
     private void SetRandomColor()
     {
@@ -274,24 +277,24 @@ public class Tetromino : MonoBehaviour
     }
 
     /// <summary>
-    /// ¿ÀºêÁ§Æ® ¿òÁ÷ÀÌ´Â ÇÔ¼ö
+    /// ì˜¤ë¸Œì íŠ¸ ì›€ì§ì´ëŠ” í•¨ìˆ˜
     /// </summary>
-    /// <param name="inputVec">ÀÎÇ² °ª</param>
+    /// <param name="inputVec">ì¸í’‹ ê°’</param>
     public void MoveObjet(Vector2 inputVec)
     {
-        // ºí·ÏÀÌ À§·Î ¿Ã¶ó°¡´Â °Í ¹æÁö
+        // ë¸”ë¡ì´ ìœ„ë¡œ ì˜¬ë¼ê°€ëŠ” ê²ƒ ë°©ì§€
         if(inputVec.y > 0)
         {
             inputVec.y = 0;
         }
 
-        // ºí·Ï ¿òÁ÷ÀÌ±â (ÇÑÄ­)
+        // ë¸”ë¡ ì›€ì§ì´ê¸° (í•œì¹¸)
         prevVector = transform.localPosition;
         transform.Translate(inputVec * 0.25f, Space.World);
     }
 
     /// <summary>
-    /// Å×Æ®¸®½º ºí·ÏÀ» ¹İÈ¯ÇÏ´Â ÇÔ¼ö
+    /// í…ŒíŠ¸ë¦¬ìŠ¤ ë¸”ë¡ì„ ë°˜í™˜í•˜ëŠ” í•¨ìˆ˜
     /// </summary>
     /// <returns></returns>
     public GameObject[] GetBlocks()
@@ -300,14 +303,14 @@ public class Tetromino : MonoBehaviour
     }
 
     /// <summary>
-    /// ¿ÀºêÁ§Æ® È¸Àü ÇÔ¼ö
+    /// ì˜¤ë¸Œì íŠ¸ íšŒì „ í•¨ìˆ˜
     /// </summary>
     public void RotateObject()
     {
-        if (Type == ShapeType.O) // O ¸ğ¾çÀº È¸Àü ¾ÈÇÔ
+        if (Type == ShapeType.O) // O ëª¨ì–‘ì€ íšŒì „ ì•ˆí•¨
             return;
 
-        rotateIndex++;
+        rotateIndex++;           // ë¸”ë¡ íšŒì „ ì¸ë±ìŠ¤ ì¶”ê°€
         rotateIndex %= 4;
 
         RotateShape.TryGetValue(Type, out int[,] result);
@@ -315,9 +318,9 @@ public class Tetromino : MonoBehaviour
     }
 
     /// <summary>
-    /// ¿ÀºêÁ§Æ® µå¶ø ÇÔ¼ö
+    /// ì˜¤ë¸Œì íŠ¸ ë“œë í•¨ìˆ˜
     /// </summary>
-    /// <param name="dropPosition">°íÁ¤µÉ À§Ä¡
+    /// <param name="dropPosition">ê³ ì •ë  ìœ„ì¹˜
     /// </param>
     public void DropObject(Vector2 dropPosition)
     {

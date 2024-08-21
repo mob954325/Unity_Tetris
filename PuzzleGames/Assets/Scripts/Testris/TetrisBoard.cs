@@ -1,55 +1,57 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class TetrisBoard : MonoBehaviour
 {
-    // ºí·Ï »ı¼º
-    // ºí·Ï ¹üÀ§ Ã¼Å©
-    // ÇÑ ÁÙ Ã¼Å©
+    // ë¸”ë¡ ìƒì„±
+    // ë¸”ë¡ ë²”ìœ„ ì²´í¬
+    // í•œ ì¤„ ì²´í¬
 
     /// <summary>
-    /// ÇÃ·¹ÀÌ¾î ÀÎÇ² (ÇÃ·¹ÀÌ¾î)
+    /// í”Œë ˆì´ì–´ ì¸í’‹ (í”Œë ˆì´ì–´)
     /// </summary>
     Player player;
 
     /// <summary>
-    /// ½ºÆù À§Ä¡ Æ®·£½ºÆû
+    /// ìŠ¤í° ìœ„ì¹˜ íŠ¸ëœìŠ¤í¼
     /// </summary>
     private Transform spawnPoint;
 
     /// <summary>
-    /// Å×Æ®¸®½º ºí·ÏµéÀÇ ºÎ¸ğ Æ®·£½ºÆû
+    /// í…ŒíŠ¸ë¦¬ìŠ¤ ë¸”ë¡ë“¤ì˜ ë¶€ëª¨ íŠ¸ëœìŠ¤í¼
     /// </summary>
     private Transform tetrominoContainer;
 
     /// <summary>
-    /// Å×Æ®¸®½º ºí·Ï ÇÁ¸®ÆÕ
+    /// í…ŒíŠ¸ë¦¬ìŠ¤ ë¸”ë¡ í”„ë¦¬íŒ¹
     /// </summary>
     public GameObject tetrominoPrefab;
 
     /// <summary>
-    /// º¸µå ¼¿ ¹è¿­ (Å×Æ®¸®½º ºí·Ï ¿ÀºêÁ§Æ® È®ÀÎ¿ë)
+    /// ë³´ë“œ ì…€ ë°°ì—´ (í…ŒíŠ¸ë¦¬ìŠ¤ ë¸”ë¡ ì˜¤ë¸Œì íŠ¸ í™•ì¸ìš©)
     /// </summary>
     private Cell[,] cells;
 
     /// <summary>
-    /// º¸µå ³ĞÀÌ
+    /// ë³´ë“œ ë„“ì´
     /// </summary>
     public float boardWidth;
 
     /// <summary>
-    /// º¸µå Å©±â
+    /// ë³´ë“œ í¬ê¸°
     /// </summary>
     public float boardHeight;
 
     /// <summary>
-    /// x °³¼ö
+    /// x ê°œìˆ˜
     /// </summary>
     private int count_x;
 
     /// <summary>
-    /// y °³¼ö
+    /// y ê°œìˆ˜
     /// </summary>
     private int count_y;
 
@@ -75,17 +77,20 @@ public class TetrisBoard : MonoBehaviour
     {
         if(player.currentTetromino != null)
         {
-            if(!player.currentTetromino.checkMoveAllow()) // ÇØ´ç ºí·ÏÀ§Ä¡ ¼¿¿¡ ÀúÀå
+            if(!player.currentTetromino.checkMoveAllow()) // í•´ë‹¹ ë¸”ë¡ìœ„ì¹˜ ì…€ì— ì €ì¥
             {
-                // ºí·Ï »õ·Î ¸¸µé°í
+                // ë¸”ë¡ ì €ì¥
                 foreach(var obj in player.currentTetromino.GetBlocks())
                 {
                     Vector2Int grid = WorldToGrid(player.currentTetromino.transform.localPosition + obj.transform.localPosition);
                     cells[grid.y, grid.x].SetBlockObject(obj);
                 }
 
-                // ÇÑ ÁÙ Ã¼Å©
-                CheckHorizontal();
+                int enumMaxLength = Enum.GetNames(typeof(ShapeType)).Length;
+                int rand = Random.Range(0, enumMaxLength);  // ëœë¤ ë¸”ë¡ ê°’
+
+                CheckHorizontal();                  // í•œ ì¤„ì´ ë§Œë“¤ì–´ì¡ŒëŠ”ì§€ ì²´í¬
+                CreateTetromino((ShapeType)rand);   // ìƒˆë¡œìš´ ë¸”ë¡ ìƒì„±
             }
         }
 
@@ -93,7 +98,7 @@ public class TetrisBoard : MonoBehaviour
     }
     
     /// <summary>
-    /// ÃÊ±âÈ­ ÇÔ¼ö
+    /// ì´ˆê¸°í™” í•¨ìˆ˜
     /// </summary>
     public void Init()
     {
@@ -101,10 +106,11 @@ public class TetrisBoard : MonoBehaviour
         count_y = (int)(boardHeight / 0.25f);
 
         CreateCells();
+        CreateTetromino(ShapeType.I);   // ìƒˆë¡œìš´ ë¸”ë¡ ìƒì„±
     }
 
     /// <summary>
-    /// ¼¿ »ı¼º ÇÔ¼ö
+    /// ì…€ ìƒì„± í•¨ìˆ˜
     /// </summary>
     private void CreateCells()
     {
@@ -120,7 +126,7 @@ public class TetrisBoard : MonoBehaviour
     }
 
     /// <summary>
-    /// Å×Æ®¸®½º ºí·Ï »ı¼º ÇÔ¼ö
+    /// í…ŒíŠ¸ë¦¬ìŠ¤ ë¸”ë¡ ìƒì„± í•¨ìˆ˜
     /// </summary>
     public void CreateTetromino(ShapeType type)
     {
@@ -131,29 +137,29 @@ public class TetrisBoard : MonoBehaviour
 
         tetromino.Init(type);
 
-        player.currentTetromino = tetromino; // ÀÓ½Ã
+        player.currentTetromino = tetromino; // ì„ì‹œ
         player.Init();
     }
 
     /// <summary>
-    /// ¸ğµç ºí·ÏÀÌ Á¶°Ç ³»¿¡ Á¸ÀçÇÒ ¼ö ÀÖ´ÂÁö È®ÀÎÇÏ´Â ÇÔ¼ö (ºí·ÏÀÌ °ãÄ¡Áö ¾Ê¾Ò´ÂÁö º¸µå ³»¿¡ ÀÖ´ÂÁö È®ÀÎ)
+    /// ëª¨ë“  ë¸”ë¡ì´ ì¡°ê±´ ë‚´ì— ì¡´ì¬í•  ìˆ˜ ìˆëŠ”ì§€ í™•ì¸í•˜ëŠ” í•¨ìˆ˜ (ë¸”ë¡ì´ ê²¹ì¹˜ì§€ ì•Šì•˜ëŠ”ì§€ ë³´ë“œ ë‚´ì— ìˆëŠ”ì§€ í™•ì¸)
     /// </summary>
-    /// <returns>¸¸Á·ÇÏ¸é true ¾Æ´Ï¸é false</returns>
+    /// <returns>ë§Œì¡±í•˜ë©´ true ì•„ë‹ˆë©´ false</returns>
     private void CheckAllBlockIsVaild()
     {
         if (player.currentTetromino == null)
              return;
 
         Tetromino curBlock = player.currentTetromino;
-        int condition = 0; // ÇØ´ç ºí·ÏÀÌ ¾î¶² »óÅÂÀÎÁö Ã¼Å©ÇÏ´Â º¯¼ö
+        int condition = 0; // í•´ë‹¹ ë¸”ë¡ì´ ì–´ë–¤ ìƒíƒœì¸ì§€ ì²´í¬í•˜ëŠ” ë³€ìˆ˜
 
         foreach(var obj in curBlock.GetBlocks())
         {
-            Vector2 pos = obj.transform.localPosition + curBlock.transform.localPosition; // ÇÑ ºí·ÏÀÇ ¿ùµå»ó À§Ä¡
+            Vector2 pos = obj.transform.localPosition + curBlock.transform.localPosition; // í•œ ë¸”ë¡ì˜ ì›”ë“œìƒ ìœ„ì¹˜
             Vector2Int grid = WorldToGrid(pos);
 
-            // ÇØ´çÀ§Ä¡¿¡ ºí·ÏÀÌ ÀÖ´ÂÁö È®ÀÎ
-            if (grid.x >= 0 && grid.y >= 0 && grid.x < count_x && grid.y < count_y + 5f) //
+            // í•´ë‹¹ìœ„ì¹˜ì— ë¸”ë¡ì´ ìˆëŠ”ì§€ í™•ì¸
+            if (grid.x >= 0 && grid.y >= 0 && grid.x < count_x && grid.y < count_y) //
             {
                 if (!cells[grid.y, grid.x].CheckVaild())
                 {
@@ -162,8 +168,8 @@ public class TetrisBoard : MonoBehaviour
                 }
             }
 
-            // ¹ş¾î³µ´ÂÁö È®ÀÎ
-            condition = 0; // ÃÊ±âÈ­
+            // ë²—ì–´ë‚¬ëŠ”ì§€ í™•ì¸
+            condition = 0; // ì´ˆê¸°í™”
 
             if (pos.x < 0) // 001
             {
@@ -180,71 +186,67 @@ public class TetrisBoard : MonoBehaviour
                 condition += 4;
             }
 
-            if(condition != 0) // ºí·ÏÀÌ Æ¯Á¤ »óÈ²¿¡ ÀÖÀ½
+            if(condition != 0) // ë¸”ë¡ì´ íŠ¹ì • ìƒí™©ì— ìˆìŒ
             {
-                SetBlockByCondition(curBlock, obj, condition); // ºí·Ï À§Ä¡ Àâ±â
+                SetBlockByCondition(curBlock, obj, condition); // ë¸”ë¡ ìœ„ì¹˜ ì¡ê¸°
             }
         }
     }
 
     /// <summary>
-    /// ºí·Ï À§Ä¡ Á¶Á¤ÇÏ´Â ÇÔ¼ö (CheckAllBlockIsVaild ÇÔ¼ö¿ë)
+    /// ë¸”ë¡ ìœ„ì¹˜ ì¡°ì •í•˜ëŠ” í•¨ìˆ˜ (CheckAllBlockIsVaild í•¨ìˆ˜ìš©)
     /// </summary>
-    /// <param name="curTetromino">Å×Æ®¸®½º ºí·Ï</param>
-    /// <param name="curBlock">ÇöÀç Ã¼Å©ÇÏ°í ÀÖ´Â Å×Æ®¸®½º ºí·ÏÀÇ ÀÚ½Ä ºí·Ï</param>
-    /// <param name="condition">ÇöÀç ºí·Ï »óÅÂ</param>
+    /// <param name="curTetromino">í…ŒíŠ¸ë¦¬ìŠ¤ ë¸”ë¡</param>
+    /// <param name="curBlock">í˜„ì¬ ì²´í¬í•˜ê³  ìˆëŠ” í…ŒíŠ¸ë¦¬ìŠ¤ ë¸”ë¡ì˜ ìì‹ ë¸”ë¡</param>
+    /// <param name="condition">í˜„ì¬ ë¸”ë¡ ìƒíƒœ</param>
     private void SetBlockByCondition(Tetromino curTetromino, GameObject curBlock, int condition)
     {
         int mask = 1;
-        for (int i = 0; i < 3; i++) // 3°³ÀÇ Á¶°Ç È®ÀÎ
+        for (int i = 0; i < 3; i++) // 3ê°œì˜ ì¡°ê±´ í™•ì¸
         {
             if ((condition & mask) == Mathf.Pow(2, i))
             {
                 switch (i)
                 {
-                    case 0: // x°¡ 0º¸´Ù ÀÛÀ½
-                        curTetromino.transform.localPosition = new Vector2(0, curTetromino.transform.localPosition.y);
+                    case 0: // xê°€ 0ë³´ë‹¤ ì‘ìŒ
+                        //curTetromino.transform.localPosition = new Vector2(0, curTetromino.transform.localPosition.y);
                         if (curTetromino.transform.localPosition.x + curBlock.transform.localPosition.x < 0)
                         {
-                            float gap = curTetromino.transform.localPosition.x + curBlock.transform.localPosition.x - 0.125f;
-                            curTetromino.transform.localPosition = new Vector2(curTetromino.transform.localPosition.x - gap, curTetromino.transform.localPosition.y);
+                            float gap = curTetromino.transform.localPosition.x + curBlock.transform.localPosition.x - 0.125f; // ê²½ê³„ì„ ì—ì„œ ë„˜ì–´ë²„ë¦° í¬ê¸° ê°’
+                            curTetromino.transform.localPosition = new Vector2(curTetromino.transform.localPosition.x - gap, curTetromino.transform.localPosition.y); // ì°¨ì´ ë§Œí¼ ë‹¤ì‹œ ì•ˆìª½ìœ¼ë¡œ ì˜®ê¸°ê¸°
                         }
-                        //curTetromino.transform.localPosition += Vector3.right * 0.25f;                            
                         break;
-                    case 1: // x°¡ boardWidth º¸´Ù Å­
-                        curTetromino.transform.localPosition = new Vector2(boardWidth - 0.25f, curTetromino.transform.localPosition.y);
+                    case 1: // xê°€ boardWidth ë³´ë‹¤ í¼
+                        //curTetromino.transform.localPosition = new Vector2(boardWidth - 0.25f, curTetromino.transform.localPosition.y);
                         if (curTetromino.transform.localPosition.x + curBlock.transform.localPosition.x > boardWidth - 0.25f)
                         {
                             float gap = (boardWidth - 0.25f) - (curTetromino.transform.localPosition.x + curBlock.transform.localPosition.x - 0.125f);
-                            Debug.Log(gap);
                             curTetromino.transform.localPosition = new Vector2(curTetromino.transform.localPosition.x + gap, curTetromino.transform.localPosition.y);
                         }
-                        //curTetromino.transform.localPosition += Vector3.left * 0.25f;
                         break;
-                    case 2: // y°¡ 0º¸´Ù ÀÛÀ½
-                        curTetromino.transform.localPosition = new Vector2(curTetromino.transform.localPosition.x, 0);
+                    case 2: // yê°€ 0ë³´ë‹¤ ì‘ìŒ
+                        //curTetromino.transform.localPosition = new Vector2(curTetromino.transform.localPosition.x, 0);
                         if (curTetromino.transform.localPosition.y + curBlock.transform.localPosition.y < 0)
                         {
                             float gap = curTetromino.transform.localPosition.y + curBlock.transform.localPosition.y - 0.125f;
                             curTetromino.transform.localPosition = new Vector2(curTetromino.transform.localPosition.x, curTetromino.transform.localPosition.y - gap);
                         }
-                        //curTetromino.transform.localPosition += Vector3.up * 0.25f;
                         break;
                 }
             }
-            mask <<= 1; // ´ÙÀ½ ÀÚ¸® ¼ö·Î ¼ö º¯°æ
+            mask <<= 1; // ë‹¤ìŒ ìë¦¬ ìˆ˜ë¡œ ìˆ˜ ë³€ê²½
         }
     }
 
     /// <summary>
-    /// °¡·ÎÁÙ Ã¼Å© ÇÔ¼ö
+    /// ê°€ë¡œì¤„ ì²´í¬ í•¨ìˆ˜
     /// </summary>
     private void CheckHorizontal()
     {
-        // ÇÑÁÙ Ã¼Å©
+        // í•œì¤„ ì²´í¬
         for(int y = 0; y < count_y; y++)
         {
-            int count = 0; // yÁÙÀÇ xºí·Ï °³¼ö
+            int count = 0; // yì¤„ì˜ xë¸”ë¡ ê°œìˆ˜
             for(int x = 0; x < count_x; x++)
             {
                 if (!cells[y,x].CheckVaild())
@@ -253,7 +255,7 @@ public class TetrisBoard : MonoBehaviour
                 }
             }
 
-            // ÇØ´ç ÁÙ¿¡ ¸ğµç ºí·ÏÀÌ Á¸ÀçÇÏ¸é Á¦°Å (1ÁÙ Á¦°Å)
+            // í•´ë‹¹ ì¤„ì— ëª¨ë“  ë¸”ë¡ì´ ì¡´ì¬í•˜ë©´ ì œê±° (1ì¤„ ì œê±°)
             if (count >= count_x)
             {
                 for(int i = 0; i < count_x; i++)
@@ -266,30 +268,30 @@ public class TetrisBoard : MonoBehaviour
     }
 
     /// <summary>
-    /// ºí·Ï ÇÑ Ä­ ³»¸®±â
+    /// ë¸”ë¡ í•œ ì¹¸ ë‚´ë¦¬ê¸°
     /// </summary>
     private void DownOneBlock(int gridX, int gridY)
     {
         int checkHeight = gridY + 1;
         while(checkHeight < count_y)
         {
-            if (!cells[checkHeight, gridX].CheckVaild()) // ÇØ´ç À§Ä¡¿¡ ºí·ÏÀÌ ¾øÀ¸¸é Á¾·á
+            if (!cells[checkHeight, gridX].CheckVaild()) // í•´ë‹¹ ìœ„ì¹˜ì— ë¸”ë¡ì´ ì—†ìœ¼ë©´ ì¢…ë£Œ
             {
                 GameObject upperObject = cells[checkHeight, gridX].GetBlockObject();
-                upperObject.transform.localPosition = new Vector2(upperObject.transform.localPosition.x, upperObject.transform.localPosition.y - 0.25f); // À§Ä¡ ³»¸²
-                cells[checkHeight - 1, gridX].SetBlockObject(upperObject);  // ¼¿ Àç¼³Á¤
-                cells[checkHeight, gridX].RemoveBlockObject(true);          // ±âÁ¸¿¡ ÀÖ´ø ¼¿ Á¤º¸ Á¦°Å
+                upperObject.transform.localPosition = new Vector2(upperObject.transform.localPosition.x, upperObject.transform.localPosition.y - 0.25f); // ìœ„ì¹˜ ë‚´ë¦¼
+                cells[checkHeight - 1, gridX].SetBlockObject(upperObject);  // ì…€ ì¬ì„¤ì •
+                cells[checkHeight, gridX].RemoveBlockObject(true);          // ê¸°ì¡´ì— ìˆë˜ ì…€ ì •ë³´ ì œê±°
             }
 
             checkHeight++;
         }
     }
 
-    // ÁÂÇ¥ º¯È¯ ===================================================================================
+    // ì¢Œí‘œ ë³€í™˜ ===================================================================================
 
     public Vector2Int WorldToGrid(Vector2 world)
     {
-        return new Vector2Int(Mathf.CeilToInt(world.x / 0.25f + 0.01f) - 1, Mathf.CeilToInt(world.y / 0.25f + 0.01f) - 1); // 2D ÇÁ·ÎÁ§Æ®ÀÌ¿©¼­ ¿ùµåÀÇ x y°ª »ç¿ë
+        return new Vector2Int(Mathf.CeilToInt(world.x / 0.25f + 0.01f) - 1, Mathf.CeilToInt(world.y / 0.25f + 0.01f) - 1); // 2D í”„ë¡œì íŠ¸ì´ì—¬ì„œ ì›”ë“œì˜ x yê°’ ì‚¬ìš©
     }
 
     public Vector2 GridToWorld(Vector2Int grid)
