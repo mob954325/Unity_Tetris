@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -55,6 +56,42 @@ public class TetrisBoard : MonoBehaviour
     /// </summary>
     private int count_y;
 
+    /// <summary>
+    /// 테트리스 현재 스코어
+    /// </summary>
+    public int tetrisScore;
+
+    public int TetrisScore
+    {
+        get => tetrisScore;
+        set
+        {
+            tetrisScore = value;
+            OnScoreChange?.Invoke(tetrisScore); //
+        }
+    }
+
+    /// <summary>
+    /// 테트리스 현재 레벨
+    /// </summary>
+    public int tetrisLevel;
+
+    public int TetrisLevel
+    {
+        get => tetrisLevel;
+        set
+        {
+            tetrisLevel = value;
+            OnLevelChange?.Invoke(tetrisLevel); //
+        }
+    }
+
+    private float levelTimer = 0f;
+    private const float levelMaxTime = 60f;
+
+    public Action<int> OnScoreChange;
+    public Action<int> OnLevelChange;
+
     private void Awake()
     {
         player = FindAnyObjectByType<Player>();
@@ -63,6 +100,7 @@ public class TetrisBoard : MonoBehaviour
 
         boardWidth = child.GetChild(0).transform.localScale.x;
         boardHeight = child.GetChild(0).transform.localScale.y;
+        boardHeight += 0.25f * 5; // 5칸 추가 (패배 확인용)
 
         child = transform.GetChild(1);
         tetrominoContainer = child.gameObject.transform;
@@ -73,28 +111,46 @@ public class TetrisBoard : MonoBehaviour
         Init();
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
+        if(!GameManager.Instance.isGameStart)
+            return;
+
+        levelTimer += Time.fixedDeltaTime;
+
+        if (levelTimer > levelMaxTime)
+        {
+            levelTimer = 0f;
+            TetrisLevel++;
+        }
+
         if(player.currentTetromino != null)
         {
-            if(!player.currentTetromino.checkMoveAllow()) // 해당 블록위치 셀에 저장
+            if(!player.currentTetromino.checkMoveAllow()) // 움직임이 멈추면 해당 위치 블록 저장
             {
                 // 블록 저장
                 foreach(var obj in player.currentTetromino.GetBlocks())
                 {
                     Vector2Int grid = WorldToGrid(player.currentTetromino.transform.localPosition + obj.transform.localPosition);
-                    cells[grid.y, grid.x].SetBlockObject(obj);
+                    cells[grid.y, grid.x].SetBlockObject(obj); // 블록 저장
+
+                    if (grid.y >= count_y - 5) // 보드 범위에 벗어났으면 
+                    {
+                        // 게임 오버
+                        GameManager.Instance.isGameStart = false;
+                    }
                 }
 
                 int enumMaxLength = Enum.GetNames(typeof(ShapeType)).Length;
                 int rand = Random.Range(0, enumMaxLength);  // 랜덤 블록 값
 
-                CheckHorizontal();                  // 한 줄이 만들어졌는지 체크
                 CreateTetromino((ShapeType)rand);   // 새로운 블록 생성
             }
         }
 
-        CheckAllBlockIsVaild();
+        CheckHorizontal();      // 한 줄이 만들어졌는지 체크
+        CheckAllBlockIsVaild(); // 현재 블록 위치 체크
+        CheckBottom();
     }
     
     /// <summary>
@@ -104,6 +160,10 @@ public class TetrisBoard : MonoBehaviour
     {
         count_x = (int)(boardWidth / 0.25f);
         count_y = (int)(boardHeight / 0.25f);
+
+        GameManager.Instance.isGameStart = true; // 임시
+        TetrisLevel = 0;
+        TetrisScore = 0;
 
         CreateCells();
         CreateTetromino(ShapeType.I);   // 새로운 블록 생성
@@ -135,7 +195,7 @@ public class TetrisBoard : MonoBehaviour
         tetromino.transform.localPosition = spawnPoint.transform.localPosition; //
         tetromino.gameObject.name = $"Tetromino_{type}";
 
-        tetromino.Init(type);
+        tetromino.Init(type, 0.5f - (0.1f * TetrisLevel));
 
         player.currentTetromino = tetromino; // 임시
         player.Init();
@@ -159,12 +219,14 @@ public class TetrisBoard : MonoBehaviour
             Vector2Int grid = WorldToGrid(pos);
 
             // 해당위치에 블록이 있는지 확인
-            if (grid.x >= 0 && grid.y >= 0 && grid.x < count_x && grid.y < count_y) //
+            if (grid.x >= 0 && grid.y >= 0 && grid.x < count_x && grid.y < count_y - 5) // 보드 범위 내 
             {
-                if (!cells[grid.y, grid.x].CheckVaild())
+                if (!cells[grid.y, grid.x].CheckVaild()) // 해당 위치에 블록이 존재하면
                 {
-                    curBlock.transform.localPosition = curBlock.prevVector;
-                    curBlock.SetMoveAllow(false);
+                    Vector2 prev = curBlock.prevVector;
+                    curBlock.transform.localPosition = curBlock.prevVector; // 이전 위치로 위치 변경 후
+                    curBlock.prevVector = prev;
+                    curBlock.SetMoveAllow(false);                           // 움직임 권한 제거
                 }
             }
 
@@ -209,7 +271,6 @@ public class TetrisBoard : MonoBehaviour
                 switch (i)
                 {
                     case 0: // x가 0보다 작음
-                        //curTetromino.transform.localPosition = new Vector2(0, curTetromino.transform.localPosition.y);
                         if (curTetromino.transform.localPosition.x + curBlock.transform.localPosition.x < 0)
                         {
                             float gap = curTetromino.transform.localPosition.x + curBlock.transform.localPosition.x - 0.125f; // 경계선에서 넘어버린 크기 값
@@ -217,7 +278,6 @@ public class TetrisBoard : MonoBehaviour
                         }
                         break;
                     case 1: // x가 boardWidth 보다 큼
-                        //curTetromino.transform.localPosition = new Vector2(boardWidth - 0.25f, curTetromino.transform.localPosition.y);
                         if (curTetromino.transform.localPosition.x + curBlock.transform.localPosition.x > boardWidth - 0.25f)
                         {
                             float gap = (boardWidth - 0.25f) - (curTetromino.transform.localPosition.x + curBlock.transform.localPosition.x - 0.125f);
@@ -225,7 +285,6 @@ public class TetrisBoard : MonoBehaviour
                         }
                         break;
                     case 2: // y가 0보다 작음
-                        //curTetromino.transform.localPosition = new Vector2(curTetromino.transform.localPosition.x, 0);
                         if (curTetromino.transform.localPosition.y + curBlock.transform.localPosition.y < 0)
                         {
                             float gap = curTetromino.transform.localPosition.y + curBlock.transform.localPosition.y - 0.125f;
@@ -243,28 +302,34 @@ public class TetrisBoard : MonoBehaviour
     /// </summary>
     private void CheckHorizontal()
     {
+        int streakCount = 0;
+
         // 한줄 체크
         for(int y = 0; y < count_y; y++)
         {
-            int count = 0; // y줄의 x블록 개수
+            int xBlockCount = 0; // y줄의 x블록 개수
+
             for(int x = 0; x < count_x; x++)
             {
                 if (!cells[y,x].CheckVaild())
                 {
-                    count++;
+                    xBlockCount++;
                 }
             }
 
             // 해당 줄에 모든 블록이 존재하면 제거 (1줄 제거)
-            if (count >= count_x)
+            if (xBlockCount >= count_x)
             {
                 for(int i = 0; i < count_x; i++)
                 {
                     cells[y, i].RemoveBlockObject();
                     DownOneBlock(i, y);
                 }
+                streakCount++;
             }
         }
+
+        TetrisScore += 1000 * (streakCount * 2);
     }
 
     /// <summary>
@@ -285,6 +350,45 @@ public class TetrisBoard : MonoBehaviour
 
             checkHeight++;
         }
+    }
+
+    /// <summary>
+    /// 밑 블록 체크 ( 블록 드랍 체크용 )
+    /// </summary>
+    private void CheckBottom()
+    {
+        Tetromino curBlock = player.currentTetromino;
+        int lowestBlockY = count_y;
+        int resultGridY = -1;
+
+        foreach (var block in curBlock.GetBlocks())
+        {
+            // 가장 낮은 블록 찾기
+            Vector2 world = curBlock.transform.localPosition + block.transform.localPosition;
+            Vector2Int grid = WorldToGrid(world);
+            if (grid.y <= lowestBlockY) // 가장 낮은 블록이면
+            {
+                lowestBlockY = grid.y;  // 높이 갱신
+
+                // 높이 체크 
+                for(int y = 0; y < count_y; y++) // 현재 x위치의 모든 y값 셀 체크
+                {
+                    if (!cells[y, grid.x].CheckVaild()) continue;
+
+                    // 블록이 없고
+                    if(y > resultGridY) // 가장 높은 위치의 블록이면 변수 저장
+                    {
+                        resultGridY = y;
+                        break;
+                    }
+                }
+            }
+        }
+
+        Debug.Log($"resultGridY : {resultGridY}");
+        Vector2 resultVec = GridToWorld(new Vector2Int(0, resultGridY - 1)) + curBlock.transform.localPosition * Vector2.right;
+        Debug.Log($"resultVec : {resultVec}");
+        curBlock.SetLowestYVector(resultVec);
     }
 
     // 좌표 변환 ===================================================================================

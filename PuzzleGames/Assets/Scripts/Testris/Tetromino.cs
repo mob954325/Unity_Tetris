@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public enum ShapeType
 {
@@ -63,6 +65,8 @@ public class Tetromino : MonoBehaviour
     /// </summary>
     public Vector2 prevVector = Vector2.zero;
 
+    public Vector2 lowestYVector = Vector2.zero; //
+
     /// <summary>
     /// 떨어지는 값 크기 (0.25 == 한 칸), 블록 오브젝트의 크기
     /// </summary>
@@ -72,6 +76,11 @@ public class Tetromino : MonoBehaviour
     /// 다음 칸으로 떨어지는데 걸리는 시간 타이머 (시간이 되면 초기화 후 위치변경)
     /// </summary>
     private float dropTimer = 0f;
+
+    /// <summary>
+    /// 떨어지는데 걸리는 시간 (default = 0.5f)
+    /// </summary>
+    private float dropDelay = 0.5f;
 
     /// <summary>
     /// 블록이 멈춰있을 때 활성화되는 타이머 (일정 시간이 지나면 블록 멈춤)
@@ -102,16 +111,17 @@ public class Tetromino : MonoBehaviour
         }
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
-        dropTimer += Time.fixedDeltaTime;
+
+        dropTimer += Time.deltaTime;
 
         if((Vector3)prevVector != transform.localPosition)
         {
             stopTimer = 1f; // 1초 대기
         }
 
-        if (allowMove && dropTimer > 0.5f)
+        if (allowMove && dropTimer > dropDelay)
         {
             dropTimer = 0f;
             prevVector = transform.localPosition;
@@ -140,10 +150,12 @@ public class Tetromino : MonoBehaviour
     /// <param name="type">블록 타입</param>
     /// <param name="width">보드 넓이</param>
     /// <param name="height">보드 높이</param>
-    public void Init(ShapeType type)
+    public void Init(ShapeType type, float dropDelay = 0.5f)
     {
         Type = type;
         allowMove = true;
+        this.dropDelay = dropDelay;
+
         SetRandomColor();
         SetRotateShape();
     }
@@ -268,11 +280,13 @@ public class Tetromino : MonoBehaviour
     /// </summary>
     private void SetRandomColor()
     {
-        float rand = Random.value;
+        float rand1 = Random.value;
+        float rand2 = Random.value;
+        float rand3 = Random.value;
         foreach(var obj in blocks)
         {
             Material material = obj.GetComponent<SpriteRenderer>().material;
-            material.color = new Color(rand, rand, rand);
+            material.color = new Color(rand1, rand2, rand3);
         }
     }
 
@@ -320,10 +334,14 @@ public class Tetromino : MonoBehaviour
     /// <summary>
     /// 오브젝트 드랍 함수
     /// </summary>
-    /// <param name="dropPosition">고정될 위치
     /// </param>
-    public void DropObject(Vector2 dropPosition)
+    public void DropObject()
     {
-        transform.localPosition = dropPosition;
+        transform.localPosition = lowestYVector;
+    }
+
+    public void SetLowestYVector(Vector2 newLowestYVector)
+    {
+        lowestYVector = newLowestYVector;
     }
 }
