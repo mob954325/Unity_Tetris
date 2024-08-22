@@ -337,6 +337,7 @@ public class Tetromino : MonoBehaviour
     /// </param>
     public void DropObject()
     {
+        prevVector = new Vector2(lowestYVector.x, lowestYVector.y + 0.25f);
         transform.localPosition = lowestYVector;
     }
 

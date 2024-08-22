@@ -6,20 +6,38 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     /// <summary>
-    /// ÇöÀç ÇÃ·¹ÀÌ¾î°¡ Á¶Á¾ÇÏ´Â Å×Æ®¸®½º ºí·Ï
+    /// í˜„ì¬ í”Œë ˆì´ì–´ê°€ ì¡°ì¢…í•˜ëŠ” í…ŒíŠ¸ë¦¬ìŠ¤ ë¸”ë¡
     /// </summary>
     public Tetromino currentTetromino;
 
     /// <summary>
-    /// ½ºÆäÀÌ½º¸¦ ´­·¶À» ¶§ È£ÃâµÇ´Â µ¨¸®°ÔÀÌÆ®
+    /// ìŠ¤í˜ì´ìŠ¤ë¥¼ ëˆŒë €ì„ ë•Œ í˜¸ì¶œë˜ëŠ” ë¸ë¦¬ê²Œì´íŠ¸
     /// </summary>
     public Action OnSpace;
 
     /// <summary>
-    /// RÅ° ´­·¶À» ¶§ È£ÃâµÇ´Â µ¨¸®°ÔÀÌÆ®
+    /// Rí‚¤ ëˆŒë €ì„ ë•Œ í˜¸ì¶œë˜ëŠ” ë¸ë¦¬ê²Œì´íŠ¸
     /// </summary>
     public Action OnKey_R;
 
+    /// <summary>
+    /// ë¸”ë¡ ë“œë ë”œë ˆì´ íƒ€ì´ë¨¸
+    /// </summary>
+    private float dropTimer = 0f;
+
+    /// <summary>
+    /// ë¸”ë¡ ë“œë ë”œë ˆì´ ê°’
+    /// </summary>
+    private float dropDelay = 0.5f;
+
+    private void Update()
+    {
+        dropTimer += Time.deltaTime;
+    }
+
+    /// <summary>
+    /// í”Œë ˆì´ì–´ ì´ˆê¸°í™” (ê²Œì„ ì‹œì‘ ì „ ì´ˆê¸°í™”)
+    /// </summary>
     public void Init()
     {
         OnSpace = DropTetromino;
@@ -27,21 +45,26 @@ public class Player : MonoBehaviour
     }
 
     /// <summary>
-    /// 
+    /// ë¸”ë¡ ë“œë ì‹œ í˜¸ì¶œë˜ëŠ” í•¨ìˆ˜
     /// </summary>
     private void DropTetromino()
     {
-        // ºí·Ï µå¶ø
-        currentTetromino.DropObject(currentTetromino.transform.localPosition * Vector2.right); // À§Ä¡ ÀÓ½Ã ¼³Á¤
+        if (dropTimer < dropDelay) return;
+
+        dropTimer = 0f;
+        currentTetromino.DropObject();
     }
 
+    /// <summary>
+    /// ë¸”ë¡ íšŒì „ì‹œ í˜¸ì¶œë˜ëŠ” í•¨ìˆ˜
+    /// </summary>
     private void RotateTetromino()
     {
         currentTetromino.RotateObject();
     }
 
     /// <summary>
-    /// ÇÃ·¹ÀÌ¾î°¡ ÇöÀç Á¶Á¾ÇÏ°í ÀÖ´Â ºí·ÏÀ» ¹İÈ¯ÇÏ´Â ÇÔ¼ö
+    /// í”Œë ˆì´ì–´ê°€ í˜„ì¬ ì¡°ì¢…í•˜ê³  ìˆëŠ” ë¸”ë¡ì„ ë°˜í™˜í•˜ëŠ” í•¨ìˆ˜
     /// </summary>
     public Tetromino GetPlayerTetromino()
     {

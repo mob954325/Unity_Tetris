@@ -11,10 +11,10 @@ public class Cell
     private bool isVaild = true;
 
     /// <summary>
-    /// Cell ÃÊ±âÈ­ 
+    /// Cell ì´ˆê¸°í™” 
     /// </summary>
-    /// <param name="x">x ÁÂÇ¥</param>
-    /// <param name="y">y ÁÂÇ¥</param>
+    /// <param name="x">x ì¢Œí‘œ</param>
+    /// <param name="y">y ì¢Œí‘œ</param>
     public Cell(int x, int y)
     {
         this.x = x;
@@ -22,9 +22,9 @@ public class Cell
     }
 
     /// <summary>
-    /// ÇØ´ç À§Ä¡ ¿ÀºêÁ§Æ®¸¦ ÀúÀåÇÏ´Â ÇÔ¼ö
+    /// í•´ë‹¹ ìœ„ì¹˜ ì˜¤ë¸Œì íŠ¸ë¥¼ ì €ì¥í•˜ëŠ” í•¨ìˆ˜
     /// </summary>
-    /// <param name="obj">ÇØ´ç À§Ä¡¿¡ ÀÖ´Â ¿ÀºêÁ§Æ®</param>
+    /// <param name="obj">í•´ë‹¹ ìœ„ì¹˜ì— ìˆëŠ” ì˜¤ë¸Œì íŠ¸</param>
     public void SetBlockObject(GameObject obj)
     {
         currnetBlockObject = obj;
@@ -32,9 +32,9 @@ public class Cell
     }
 
     /// <summary>
-    /// ÇØ´ç ¼¿ÀÇ Á¤º¸¸¦ Á¦°ÅÇÏ´Â ÇÔ¼ö (ºí·Ï Á¦°Å)
+    /// í•´ë‹¹ ì…€ì˜ ì •ë³´ë¥¼ ì œê±°í•˜ëŠ” í•¨ìˆ˜ (ë¸”ë¡ ì œê±°)
     /// </summary>
-    /// <param name="activeSelf">ºí·Ï ¿ÀºêÁ§Æ® È°¼ºÈ­ ¿©ºÎ (default : false)</param>
+    /// <param name="activeSelf">ë¸”ë¡ ì˜¤ë¸Œì íŠ¸ í™œì„±í™” ì—¬ë¶€ (default : false)</param>
     public void RemoveBlockObject(bool activeSelf = false)
     {
         currnetBlockObject.SetActive(activeSelf);
@@ -48,7 +48,7 @@ public class Cell
     }
 
     /// <summary>
-    /// SetVaild º¯°æ ÇÔ¼ö
+    /// SetVaild ë³€ê²½ í•¨ìˆ˜
     /// </summary>
     public void SetVaild(bool value)
     {
@@ -56,9 +56,9 @@ public class Cell
     }
 
     /// <summary>
-    /// ÇØ´ç À§Ä¡°¡ À¯È¿ÇÑ CellÀÎÁö È®ÀÎÇÏ´Â ÇÔ¼ö 
+    /// í•´ë‹¹ ìœ„ì¹˜ê°€ ìœ íš¨í•œ Cellì¸ì§€ í™•ì¸í•˜ëŠ” í•¨ìˆ˜ 
     /// </summary>
-    /// <returns>À¯¿äÇÏ¸é true ¾Æ´Ï¸é false</returns>
+    /// <returns>ìœ íš¨í•˜ë©´ true ì•„ë‹ˆë©´ false</returns>
     public bool CheckVaild()
     {
         return isVaild;

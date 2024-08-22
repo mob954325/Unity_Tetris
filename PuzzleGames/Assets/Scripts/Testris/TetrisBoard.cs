@@ -7,10 +7,6 @@ using Random = UnityEngine.Random;
 
 public class TetrisBoard : MonoBehaviour
 {
-    // 블록 생성
-    // 블록 범위 체크
-    // 한 줄 체크
-
     /// <summary>
     /// 플레이어 인풋 (플레이어)
     /// </summary>
@@ -61,13 +57,16 @@ public class TetrisBoard : MonoBehaviour
     /// </summary>
     public int tetrisScore;
 
+    /// <summary>
+    /// 테트리스 스코어 접근 및 수정 프로퍼티
+    /// </summary>
     public int TetrisScore
     {
         get => tetrisScore;
         set
         {
             tetrisScore = value;
-            OnScoreChange?.Invoke(tetrisScore); //
+            OnScoreChange?.Invoke(tetrisScore);
         }
     }
 
@@ -76,20 +75,37 @@ public class TetrisBoard : MonoBehaviour
     /// </summary>
     public int tetrisLevel;
 
+    /// <summary>
+    /// 테트리스 레벨 접근 및 수정 프로퍼티
+    /// </summary>
     public int TetrisLevel
     {
         get => tetrisLevel;
         set
         {
             tetrisLevel = value;
-            OnLevelChange?.Invoke(tetrisLevel); //
+            OnLevelChange?.Invoke(tetrisLevel);
         }
     }
 
+    /// <summary>
+    /// 레벨 변경 타이머
+    /// </summary>
     private float levelTimer = 0f;
+    
+    /// <summary>
+    /// 레벨 변경 시간 ( 타이머가 해당 시간에 도달하면 레벨 증가)
+    /// </summary>
     private const float levelMaxTime = 60f;
 
+    /// <summary>
+    /// 스코어 변경 시 호출되는 델리게이트
+    /// </summary>
     public Action<int> OnScoreChange;
+
+    /// <summary>
+    /// 레벨 변경 시 호출되는 델리게이트
+    /// </summary>
     public Action<int> OnLevelChange;
 
     private void Awake()
@@ -142,7 +158,7 @@ public class TetrisBoard : MonoBehaviour
                 }
 
                 int enumMaxLength = Enum.GetNames(typeof(ShapeType)).Length;
-                int rand = Random.Range(0, enumMaxLength);  // 랜덤 블록 값
+                int rand = Random.Range(1, enumMaxLength);  // 랜덤 블록 값
 
                 CreateTetromino((ShapeType)rand);   // 새로운 블록 생성
             }
@@ -359,36 +375,48 @@ public class TetrisBoard : MonoBehaviour
     {
         Tetromino curBlock = player.currentTetromino;
         int lowestBlockY = count_y;
-        int resultGridY = -1;
+        Vector2 resultBlock = Vector2.zero;
+        Vector2Int resultGrid = new Vector2Int(-1, -1); // 목표 위치 그리드 값
 
         foreach (var block in curBlock.GetBlocks())
         {
             // 가장 낮은 블록 찾기
             Vector2 world = curBlock.transform.localPosition + block.transform.localPosition;
             Vector2Int grid = WorldToGrid(world);
-            if (grid.y <= lowestBlockY) // 가장 낮은 블록이면
+
+            // 높이 체크 
+            for(int y = 0; y < count_y; y++) // 현재 x위치의 모든 y값 셀 체크
             {
-                lowestBlockY = grid.y;  // 높이 갱신
+                if (!cells[y, grid.x].CheckVaild()) continue;
 
-                // 높이 체크 
-                for(int y = 0; y < count_y; y++) // 현재 x위치의 모든 y값 셀 체크
+                // 블록이 없고
+                if(y > resultGrid.y) // 가장 높은 위치의 블록이면 변수 저장
                 {
-                    if (!cells[y, grid.x].CheckVaild()) continue;
-
-                    // 블록이 없고
-                    if(y > resultGridY) // 가장 높은 위치의 블록이면 변수 저장
-                    {
-                        resultGridY = y;
-                        break;
-                    }
+                    resultBlock = world;
+                    resultGrid = new Vector2Int(grid.x, y);
+                    break;
                 }
             }
         }
 
-        Debug.Log($"resultGridY : {resultGridY}");
-        Vector2 resultVec = GridToWorld(new Vector2Int(0, resultGridY - 1)) + curBlock.transform.localPosition * Vector2.right;
-        Debug.Log($"resultVec : {resultVec}");
-        curBlock.SetLowestYVector(resultVec);
+        // 체크한 그리드와 curblock의 y축 차이가 존재하면 해당 값 많큼 올리기
+        Vector2 resultVec = Vector2.zero; // 결과
+        Vector2 gap = new Vector2(resultBlock.x - 0.125f, resultBlock.y - 0.125f) - (Vector2)curBlock.transform.localPosition; // 목표 블록과 현재 블록의 차이값
+
+        if(gap.y != 0)
+        {
+            Vector2 worldVec = GridToWorld(resultGrid);
+            resultVec = new Vector2(worldVec.x, worldVec.y + 0.25f); // 한 칸만큼 값 추가 (부모 포지션과 블록 포지션의 차이가 많아봤자 1칸만 차이나기 때문)
+
+        }
+        else
+        {
+            resultVec = GridToWorld(resultGrid);
+        }
+
+        Debug.Log($"result {resultVec}");
+
+        curBlock.SetLowestYVector(resultVec - gap);
     }
 
     // 좌표 변환 ===================================================================================
