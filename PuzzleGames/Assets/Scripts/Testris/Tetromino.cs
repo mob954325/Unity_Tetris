@@ -65,7 +65,10 @@ public class Tetromino : MonoBehaviour
     /// </summary>
     public Vector2 prevVector = Vector2.zero;
 
-    public Vector2 lowestYVector = Vector2.zero; //
+    /// <summary>
+    /// 가장 낮은 Y 위치 (블록 드랍용)
+    /// </summary>
+    public Vector2 lowestYVector = Vector2.zero;
 
     /// <summary>
     /// 떨어지는 값 크기 (0.25 == 한 칸), 블록 오브젝트의 크기

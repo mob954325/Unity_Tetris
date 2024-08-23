@@ -123,8 +123,11 @@ public class TetrisBoard : MonoBehaviour
 
         child = transform.GetChild(2);
         spawnPoint = child.gameObject.transform;
+    }
 
-        Init();
+    private void Start()
+    {
+        Init();        
     }
 
     private void FixedUpdate()
@@ -389,13 +392,20 @@ public class TetrisBoard : MonoBehaviour
             {
                 if (!cells[y, grid.x].CheckVaild()) continue;
 
-                // 블록이 없고
-                if(y > resultGrid.y) // 가장 높은 위치의 블록이면 변수 저장
+                if (resultGrid.y < 0) // 처음 체크하고 가장 첫 줄이 비어있으면
+                {
+                    resultBlock = world;
+                    resultGrid = new Vector2Int(grid.x, 0);
+                }
+
+                // 두번째 줄부터 밑에 블록이 있고 기존에 저장되있는 위치보다 높으면
+                if (y > 0 && y > resultGrid.y && !cells[y - 1, grid.x].CheckVaild()) // 가장 높은 위치의 블록이면 변수 저장
                 {
                     resultBlock = world;
                     resultGrid = new Vector2Int(grid.x, y);
                     break;
                 }
+                else if(y == resultGrid.y) continue; // 다른 블록이 같은 위치면 다음 블록 체크
             }
         }
 
@@ -403,11 +413,11 @@ public class TetrisBoard : MonoBehaviour
         Vector2 resultVec = Vector2.zero; // 결과
         Vector2 gap = new Vector2(resultBlock.x - 0.125f, resultBlock.y - 0.125f) - (Vector2)curBlock.transform.localPosition; // 목표 블록과 현재 블록의 차이값
 
+        Debug.Log($"result {gap}");
         if(gap.y != 0)
         {
             Vector2 worldVec = GridToWorld(resultGrid);
             resultVec = new Vector2(worldVec.x, worldVec.y + 0.25f); // 한 칸만큼 값 추가 (부모 포지션과 블록 포지션의 차이가 많아봤자 1칸만 차이나기 때문)
-
         }
         else
         {
