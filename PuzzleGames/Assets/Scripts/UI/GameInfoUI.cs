@@ -16,14 +16,21 @@ public class GameInfoUI : MonoBehaviour
     /// </summary>
     LevelUI levelUI;
 
+    /// <summary>
+    /// 저장된 블록 출력하는 UI
+    /// </summary>
+    SavedUI savedUI;
+
     private void Awake()
     {
         tetris = FindAnyObjectByType<TetrisBoard>();
 
         scoreUI = GetComponentInChildren<ScoreUI>();
         levelUI = GetComponentInChildren<LevelUI>();
+        savedUI = GetComponentInChildren<SavedUI>();
 
         tetris.OnScoreChange = scoreUI.SetScoreText;
         tetris.OnLevelChange = levelUI.SetLevelText;
+        tetris.OnShapeTypeChange = savedUI.SetBlockUI;
     }
 }

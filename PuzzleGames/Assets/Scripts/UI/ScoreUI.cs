@@ -15,6 +15,5 @@ public class ScoreUI : MonoBehaviour
     public void SetScoreText(int score)
     {
         scoreText.text = $"{score}";
-        Debug.Log("asdf");
     }
 }

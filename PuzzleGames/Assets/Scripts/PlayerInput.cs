@@ -7,20 +7,20 @@ using UnityEngine.InputSystem.Interactions;
 
 public class PlayerInput : MonoBehaviour
 {
-    // Å×Æ®¸®½º Á¶ÀÛ
-    // asd = ºí·Ï Á¶ÀÛ (²Ú ´©¸£¸é °è¼Ó ÀÌµ¿)
-    // space(doubleTap) = ºí·Ï µå¶ø
+    // í…ŒíŠ¸ë¦¬ìŠ¤ ì¡°ì‘
+    // asd = ë¸”ë¡ ì¡°ì‘ (ê¾¹ ëˆ„ë¥´ë©´ ê³„ì† ì´ë™)
+    // space(doubleTap) = ë¸”ë¡ ë“œë
 
     Player player;
     PlayerInputAction playerInputAction;
 
     /// <summary>
-    /// ÀÎÇ² º¤ÅÍ
+    /// ì¸í’‹ ë²¡í„°
     /// </summary>
     private Vector2 inputVec = Vector2.zero;
 
     /// <summary>
-    /// ÀÎÇ² ±ÇÇÑÀÌ ÀÖ´ÂÁö È®ÀÎ º¯¼ö
+    /// ì¸í’‹ ê¶Œí•œì´ ìˆëŠ”ì§€ í™•ì¸ ë³€ìˆ˜
     /// </summary>
     public bool allowInput = false;
 
@@ -41,6 +41,8 @@ public class PlayerInput : MonoBehaviour
         playerInputAction.Player.Drop.canceled += OnDrop;
 
         playerInputAction.Player.Rotate.performed += OnRotate;
+
+        playerInputAction.Player.SaveBlock.performed += OnSaveBlock;
     }
 
     private void OnDisable()
@@ -69,9 +71,14 @@ public class PlayerInput : MonoBehaviour
     private void OnBlockMove(InputAction.CallbackContext context)
     {
         inputVec = context.ReadValue<Vector2>();
-        if(inputVec.x < -0.9f || inputVec.x > 0.9f || inputVec.y > 0.9f || inputVec.y < -0.9f) // ´ë°¢¼± ¹æÁö
+        if(inputVec.x < -0.9f || inputVec.x > 0.9f || inputVec.y > 0.9f || inputVec.y < -0.9f) // ëŒ€ê°ì„  ë°©ì§€
         {
             player.GetPlayerTetromino().MoveObjet(inputVec);
         }
+    }
+
+    private void OnSaveBlock(InputAction.CallbackContext context)
+    {
+        player.OnKey_Q?.Invoke();
     }
 }

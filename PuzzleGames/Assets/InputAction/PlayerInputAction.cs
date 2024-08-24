@@ -53,6 +53,15 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SaveBlock"",
+                    ""type"": ""Button"",
+                    ""id"": ""3881f00e-95fb-4b48-b6a6-46f90d9d2e5e"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -132,6 +141,17 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""action"": ""Rotate"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a10ca0cb-cd04-40de-b2a8-4fec4aef5727"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SaveBlock"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -160,6 +180,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
         m_Player_Drop = m_Player.FindAction("Drop", throwIfNotFound: true);
         m_Player_Rotate = m_Player.FindAction("Rotate", throwIfNotFound: true);
+        m_Player_SaveBlock = m_Player.FindAction("SaveBlock", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -224,6 +245,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Move;
     private readonly InputAction m_Player_Drop;
     private readonly InputAction m_Player_Rotate;
+    private readonly InputAction m_Player_SaveBlock;
     public struct PlayerActions
     {
         private @PlayerInputAction m_Wrapper;
@@ -231,6 +253,7 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         public InputAction @Move => m_Wrapper.m_Player_Move;
         public InputAction @Drop => m_Wrapper.m_Player_Drop;
         public InputAction @Rotate => m_Wrapper.m_Player_Rotate;
+        public InputAction @SaveBlock => m_Wrapper.m_Player_SaveBlock;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -249,6 +272,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @Rotate.started += instance.OnRotate;
             @Rotate.performed += instance.OnRotate;
             @Rotate.canceled += instance.OnRotate;
+            @SaveBlock.started += instance.OnSaveBlock;
+            @SaveBlock.performed += instance.OnSaveBlock;
+            @SaveBlock.canceled += instance.OnSaveBlock;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -262,6 +288,9 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @Rotate.started -= instance.OnRotate;
             @Rotate.performed -= instance.OnRotate;
             @Rotate.canceled -= instance.OnRotate;
+            @SaveBlock.started -= instance.OnSaveBlock;
+            @SaveBlock.performed -= instance.OnSaveBlock;
+            @SaveBlock.canceled -= instance.OnSaveBlock;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -293,5 +322,6 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         void OnMove(InputAction.CallbackContext context);
         void OnDrop(InputAction.CallbackContext context);
         void OnRotate(InputAction.CallbackContext context);
+        void OnSaveBlock(InputAction.CallbackContext context);
     }
 }

@@ -16,9 +16,19 @@ public class Player : MonoBehaviour
     public Action OnSpace;
 
     /// <summary>
-    /// R키 눌렀을 때 호출되는 델리게이트
+    /// R키 눌렀을 때 호출되는 델리게이트 (회전)
     /// </summary>
     public Action OnKey_R;
+
+    /// <summary>
+    /// Q키를 눌렀을 때 호출 되는 델리게이트 (블록 저장)
+    /// </summary>
+    public Action OnKey_Q;
+
+    /// <summary>
+    /// 현재 저장된 블록
+    /// </summary>
+    private ShapeType savedType = ShapeType.None;
 
     /// <summary>
     /// 블록 드랍 딜레이 타이머
@@ -61,6 +71,23 @@ public class Player : MonoBehaviour
     private void RotateTetromino()
     {
         currentTetromino.RotateObject();
+    }
+
+    /// <summary>
+    /// 현재 블록 타입 저장함수
+    /// </summary>
+    public void SaveCurrentBlock()
+    {
+        savedType = currentTetromino.Type;
+    }
+
+    /// <summary>
+    /// 현재 저장된 타입을 반환하는 함수
+    /// </summary>
+    /// <returns>현재 타입 반환 (없으면 None타입 반환)</returns>
+    public ShapeType GetSavedType()
+    {
+        return savedType;
     }
 
     /// <summary>

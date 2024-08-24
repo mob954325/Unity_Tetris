@@ -27,9 +27,15 @@ public class Tetromino : MonoBehaviour
     /// </summary>
     int rotateIndex = 0;
 
-    public ShapeType type = ShapeType.None;
+    /// <summary>
+    /// 현재 Tetromino의 블록 타입
+    /// </summary>
+    private ShapeType type = ShapeType.None;
 
-    private ShapeType Type
+    /// <summary>
+    /// 블록 타입 변경 및 접근용 프로퍼티
+    /// </summary>
+    public ShapeType Type
     {
         get => type;
         set
@@ -116,7 +122,6 @@ public class Tetromino : MonoBehaviour
 
     private void Update()
     {
-
         dropTimer += Time.deltaTime;
 
         if((Vector3)prevVector != transform.localPosition)
@@ -324,8 +329,12 @@ public class Tetromino : MonoBehaviour
     /// </summary>
     public void RotateObject()
     {
+        if (!allowMove)
+            return;
+
         if (Type == ShapeType.O) // O 모양은 회전 안함
             return;
+
 
         rotateIndex++;           // 블록 회전 인덱스 추가
         rotateIndex %= 4;
@@ -344,6 +353,10 @@ public class Tetromino : MonoBehaviour
         transform.localPosition = lowestYVector;
     }
 
+    /// <summary>
+    /// 가장 낮은 Y값을 가진 벡터를 저장하는 함수 (블록 드랍용)
+    /// </summary>
+    /// <param name="newLowestYVector"></param>
     public void SetLowestYVector(Vector2 newLowestYVector)
     {
         lowestYVector = newLowestYVector;

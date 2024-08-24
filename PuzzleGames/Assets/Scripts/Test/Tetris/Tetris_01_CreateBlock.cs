@@ -16,7 +16,7 @@ public class Tetris_01_CreateBlock : TestBase
 
     public override void OnKey1(InputAction.CallbackContext context)
     {
-        board.CreateTetromino(type);
+        //board.CreateTetromino(type);
     }
 }
 #endif

@@ -99,6 +99,11 @@ public class TetrisBoard : MonoBehaviour
     private const float levelMaxTime = 60f;
 
     /// <summary>
+    /// 블록을 변경했는지 확인하는 함수 (변경했으면 true 아니면 false)
+    /// </summary>
+    private bool isSwitched = false;
+
+    /// <summary>
     /// 스코어 변경 시 호출되는 델리게이트
     /// </summary>
     public Action<int> OnScoreChange;
@@ -108,9 +113,15 @@ public class TetrisBoard : MonoBehaviour
     /// </summary>
     public Action<int> OnLevelChange;
 
+    /// <summary>
+    /// 저장된 블록 타입 변경시 호출되는 델리게이트
+    /// </summary>
+    public Action<ShapeType> OnShapeTypeChange;
+
     private void Awake()
     {
         player = FindAnyObjectByType<Player>();
+        player.OnKey_Q += SwitchBlock;
 
         Transform child = transform.GetChild(0);
 
@@ -164,6 +175,7 @@ public class TetrisBoard : MonoBehaviour
                 int rand = Random.Range(1, enumMaxLength);  // 랜덤 블록 값
 
                 CreateTetromino((ShapeType)rand);   // 새로운 블록 생성
+                isSwitched = false;
             }
         }
 
@@ -203,6 +215,8 @@ public class TetrisBoard : MonoBehaviour
             }
         }
     }
+
+    // 블록 기능 함수 ===================================================================================
 
     /// <summary>
     /// 테트리스 블록 생성 함수
@@ -413,7 +427,6 @@ public class TetrisBoard : MonoBehaviour
         Vector2 resultVec = Vector2.zero; // 결과
         Vector2 gap = new Vector2(resultBlock.x - 0.125f, resultBlock.y - 0.125f) - (Vector2)curBlock.transform.localPosition; // 목표 블록과 현재 블록의 차이값
 
-        Debug.Log($"result {gap}");
         if(gap.y != 0)
         {
             Vector2 worldVec = GridToWorld(resultGrid);
@@ -424,9 +437,37 @@ public class TetrisBoard : MonoBehaviour
             resultVec = GridToWorld(resultGrid);
         }
 
-        Debug.Log($"result {resultVec}");
-
         curBlock.SetLowestYVector(resultVec - gap);
+    }
+
+    /// <summary>
+    /// 현재 블록을 저장하는 함수
+    /// </summary>
+    private void SwitchBlock()
+    {
+        if(player.currentTetromino == null)
+            return;
+
+        if (isSwitched)
+            return;
+
+        isSwitched = true;
+        ShapeType saved = player.GetSavedType();            // 이전에 저장된 블록 (없으면 None타입)
+
+        player.SaveCurrentBlock();                          // 현재 블록 저장
+        OnShapeTypeChange?.Invoke(player.GetSavedType());   // 저장된 블록 UI로 띄우기
+        Destroy(player.currentTetromino.gameObject);        // 현재 블록 파괴
+
+        if(saved == ShapeType.None) // 저장된 블록이 없으면 새로 생성
+        {
+            int enumMaxLength = Enum.GetNames(typeof(ShapeType)).Length;
+            int rand = Random.Range(1, enumMaxLength);
+            CreateTetromino((ShapeType)rand);           
+        }
+        else // 저장된 블록이 존재하면 변경
+        {
+            CreateTetromino(saved); // 저장된 블록 생성
+        }
     }
 
     // 좌표 변환 ===================================================================================
