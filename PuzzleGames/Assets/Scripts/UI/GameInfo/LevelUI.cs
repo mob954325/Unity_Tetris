@@ -14,6 +14,6 @@ public class LevelUI : MonoBehaviour
 
     public void SetLevelText(int currentLv)
     {
-        levelText.text = $"{currentLv}";
+        levelText.text = $"Lv.{currentLv}";
     }
 }

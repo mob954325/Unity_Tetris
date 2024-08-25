@@ -136,11 +136,6 @@ public class TetrisBoard : MonoBehaviour
         spawnPoint = child.gameObject.transform;
     }
 
-    private void Start()
-    {
-        Init();        
-    }
-
     private void FixedUpdate()
     {
         if(!GameManager.Instance.isGameStart)
@@ -166,8 +161,10 @@ public class TetrisBoard : MonoBehaviour
 
                     if (grid.y >= count_y - 5) // 보드 범위에 벗어났으면 
                     {
-                        // 게임 오버
+                        // 게임 오버 =========================================================
                         GameManager.Instance.isGameStart = false;
+                        GameManager.Instance.OnGameEnd?.Invoke();
+                        player.currentTetromino.SetMoveAllow(false); // 블록 비활성화
                     }
                 }
 
@@ -187,12 +184,12 @@ public class TetrisBoard : MonoBehaviour
     /// <summary>
     /// 초기화 함수
     /// </summary>
-    public void Init()
+    public void StartTetris()
     {
         count_x = (int)(boardWidth / 0.25f);
         count_y = (int)(boardHeight / 0.25f);
 
-        GameManager.Instance.isGameStart = true; // 임시
+        GameManager.Instance.isGameStart = true;
         TetrisLevel = 0;
         TetrisScore = 0;
 
