@@ -122,6 +122,7 @@ public class Tetromino : MonoBehaviour
 
     private void Update()
     {
+        CheckIsStop();
         dropTimer += Time.deltaTime;
 
         if((Vector3)prevVector != transform.localPosition)
@@ -135,8 +136,6 @@ public class Tetromino : MonoBehaviour
             prevVector = transform.localPosition;
             transform.Translate(Vector2.down * DropScale, Space.World);
         }
-
-        CheckIsStop();
     }
 
     /// <summary>
@@ -144,7 +143,7 @@ public class Tetromino : MonoBehaviour
     /// </summary>
     private void CheckIsStop()
     {
-        stopTimer -= Time.fixedDeltaTime;
+        stopTimer -= Time.deltaTime;
 
         if(stopTimer < 0f)
         {
