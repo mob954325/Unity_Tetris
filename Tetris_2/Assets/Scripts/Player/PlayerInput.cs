@@ -5,51 +5,51 @@ using UnityEngine.InputSystem;
 public class PlayerInput : MonoBehaviour
 {
     PlayerInputActions action;
-    Board board;
+
+    public Action<Vector2> OnMove;
 
     private void Awake()
     {
         action = new PlayerInputActions();
-        board = FindAnyObjectByType<Board>();
     }
 
     private void OnEnable()
     {
         action.Player.Enable();
-        action.Player.Move.performed += OnMove;
+        action.Player.Move.performed += OnMoveInput;
         //action.Player.Move.canceled += OnMove;
-        action.Player.Drop.performed += OnDrop;
-        action.Player.Drop.canceled += OnDrop;
-        action.Player.Pause.performed += OnEscape;
+        action.Player.Drop.performed += OnDropInput;
+        action.Player.Drop.canceled += OnDropInput;
+        action.Player.Pause.performed += OnEscapeInput;
     }
 
     private void OnDisable()
     {
-        action.Player.Pause.performed -= OnEscape;
+        action.Player.Pause.performed -= OnEscapeInput;
         //action.Player.Drop.canceled -= OnDrop;
-        action.Player.Drop.performed -= OnDrop;
-        action.Player.Move.canceled -= OnMove;
-        action.Player.Move.performed -= OnMove;
+        action.Player.Drop.performed -= OnDropInput;
+        action.Player.Move.canceled -= OnMoveInput;
+        action.Player.Move.performed -= OnMoveInput;
         action.Player.Disable();
     }
 
-    private void OnEscape(InputAction.CallbackContext context)
+    private void OnEscapeInput(InputAction.CallbackContext context)
     {
         Debug.Log("esc");
     }
 
-    private void OnDrop(InputAction.CallbackContext context)
+    private void OnDropInput(InputAction.CallbackContext context)
     {
         Debug.Log("drop");
     }
 
-    private void OnMove(InputAction.CallbackContext obj)
+    private void OnMoveInput(InputAction.CallbackContext obj)
     {
         Vector2 moveVec = obj.ReadValue<Vector2>();
 
         if (moveVec != Vector2.one)
         {
-            board.MoveCurBlock(VectorToVectorInt(moveVec));
+            OnMove?.Invoke(moveVec);    
         }
     }
 

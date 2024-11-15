@@ -143,3 +143,4 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 5b3a1c4f2d2e1f846a6e76cd2c5aa23b, type: 3}
   - {fileID: 21300000, guid: d4d464255adb8b3489f667a17e72b2a3, type: 3}
   gridPosition: {x: 0, y: 0}
+  availableDrop: 1

@@ -7,6 +7,7 @@ using static Unity.Collections.AllocatorManager;
 
 public class Board : MonoBehaviour
 {
+    private PlayerInput input;
     private Transform spawnPoint;
     
     private Block[,] blockGridInBoard;
@@ -38,6 +39,9 @@ public class Board : MonoBehaviour
 
     private void Start()
     {
+        input = FindAnyObjectByType<PlayerInput>();
+        input.OnMove += MoveCurBlock;
+
         factory = FindAnyObjectByType<BlockFactory>();
         spawnPoint = transform.GetChild(0);
 
@@ -47,7 +51,7 @@ public class Board : MonoBehaviour
         colorTypeCount = Enum.GetValues(typeof(ColorType)).Length;
 
         blockGridInBoard = new Block[horizontalCount + 1, verticalCount];
-        for(int i = 0; i < horizontalCount; i++)
+        for(int i = 0; i < horizontalCount + 1; i++)
         {
             for(int j = 0; j < verticalCount; j++)
             {
@@ -66,17 +70,22 @@ public class Board : MonoBehaviour
 
         CheckBlockOverlap();
 
-        if (isBlockExist && CheckBlockDownGrid() && timer < 1f)
+        if (IsDownGridExist())
         {
             timer += Time.deltaTime;
+        }
+        else // 닿은게 없으면 타이머 초기화
+        {
+            timer = 0f;
         }
 
         if(timer > 1f)
         {
             BlockSpawnLoop();
-            CheckLineClear();
             timer = 0f;
         }
+
+        CheckLineClear();
     }
 
     private void BlockSpawnLoop()
@@ -117,7 +126,7 @@ public class Board : MonoBehaviour
     /// <summary>
     /// 현재 움직이는 블록 밑 그리드 확인 함수 ( 블록 겹치기 방지 )
     /// </summary>
-    private bool CheckBlockDownGrid()
+    private bool IsDownGridExist()
     {
         bool result = false;
         int availableGridCount = 0;
@@ -164,7 +173,7 @@ public class Board : MonoBehaviour
             foreach (var item in curBlock)
             {
                 item.AvailableDrop = true;
-                result = true;
+                result = false;
             }
         }
 
@@ -173,6 +182,9 @@ public class Board : MonoBehaviour
 
     private void CheckBlockOverlap()
     {
+        if (curBlock == null)
+            return;
+
         for (int i = 0; i < curBlock.Length; i++)
         {
             if (i == 1) continue;
@@ -180,7 +192,7 @@ public class Board : MonoBehaviour
             if (blockGridInBoard[curBlock[i].GridPosition.x, curBlock[i].GridPosition.y])
             {
                 Debug.Log("겹침");
-                if (curBlockSlotNum[i < 0 ? i + 1 : i] == 7)
+                if (curBlockSlotNum[i > 0 ? i - 1 : i] == 7)
                 {
                     // 왼쪽이 겹쳤는가
                     Debug.Log("left");
@@ -189,7 +201,7 @@ public class Board : MonoBehaviour
                         block.Move(1, 0);
                     }
                 }
-                else if (curBlockSlotNum[i < 0 ? i + 1 : i] == 3)
+                else if (curBlockSlotNum[i > 0 ? i - 1 : i] == 3)
                 {
                     // 오른쪽이 겹쳤는가
                     Debug.Log("right");
@@ -214,30 +226,35 @@ public class Board : MonoBehaviour
         for(int y = 0; y < verticalCount; y++)
         {
             int count = 0;
-            for(int x = 1; x < horizontalCount; x++)
+            for(int x = 0; x < horizontalCount; x++)
             {
-                if(blockGridInBoard[x, y] != null)
+                if(blockGridInBoard[x + 1, y] != null)
                 {
                     count++;
-                    blockObjs[x] = blockGridInBoard[x, y].gameObject;
+                    blockObjs[x] = blockGridInBoard[x + 1, y].gameObject;
                 }
             }
 
             // 개수가 가로칸만큼 있으면 배열에 있는 모든 블록 비활성화
             if(count == horizontalCount)
             {
-                for(int i = 1; i < horizontalCount; i++)
+                for(int i = 0; i < horizontalCount; i++)
                 {
                     blockObjs[i].SetActive(false);
                     blockObjs[i] = null;
                 }
 
+                // 모든 줄 내리기
                 for(int upper = y; upper < verticalCount; upper++)
                 {
-                    for(int x = 0; x < horizontalCount; x++)
+                    // Todo : 제거 후 위 블록 한 줄씩 내리고 다시 저장하기
+                    for(int x = 1; x < horizontalCount + 1; x++)
                     {
+/*                        Block temp = blockGridInBoard[x, upper];
                         blockGridInBoard[x, upper].Move(Vector2Int.down);
-                        blockGridInBoard[x, upper].SetGrid(blockGridInBoard[x, upper].GridPosition - Vector2Int.down);
+                        blockGridInBoard[x, upper] = null;
+                        blockGridInBoard[x - 1, upper] = temp;*/
+                        //blockGridInBoard[x, upper].SetGrid(blockGridInBoard[x, upper].GridPosition - Vector2Int.down);
                     }
                 }
             }
@@ -321,18 +338,18 @@ public class Board : MonoBehaviour
         centerBlock = curBlock[1]; // 회전을 위한 중심블록 설정
     }
 
-    public void MoveCurBlock(Vector2Int moveVec)
+    public void MoveCurBlock(Vector2 moveVec)
     {
         int checkCount = 0; // 이동가능한 블록 개수
 
         foreach(var block in curBlock)
         {
-            Vector2Int nextPosition = block.GridPosition + moveVec;
+            Vector2 nextPosition = block.GridPosition + moveVec;
 
-            if(nextPosition.x > 0 && nextPosition.y > 0 && nextPosition.x < horizontalCount + 1 && nextPosition.y < verticalCount)
+            if(nextPosition.x > 0 && nextPosition.y >= 0 && nextPosition.x < horizontalCount + 1 && nextPosition.y < verticalCount)
             {
                 // 다음 위치에 블록이 존재하지 않으면
-                if(blockGridInBoard[nextPosition.x, nextPosition.y] == null)
+                if(blockGridInBoard[(int)nextPosition.x, (int)nextPosition.y] == null)
                 {
                     checkCount++;
                 }
@@ -509,6 +526,7 @@ public class Board : MonoBehaviour
         foreach(var block in curBlock)
         {
             block.AvailableDrop = false;
+            block.gameObject.SetActive(false);
         }
 
         Block[] testBlocks = new Block[horizontalCount];
@@ -516,7 +534,7 @@ public class Board : MonoBehaviour
         // 1줄 생성 후
         for (int i = 0; i < horizontalCount; i++)
         {
-            Vector2 horizonSpawnPoint = new Vector2(i + 1, 1);
+            Vector2 horizonSpawnPoint = new Vector2(i + 1, 0);
             GameObject obj = factory.SpawnBlock(horizonSpawnPoint);
             testBlocks[i] = obj.GetComponent<Block>();
         }
@@ -524,10 +542,8 @@ public class Board : MonoBehaviour
         // 모든 블록 정지
         for (int i = 0; i < horizontalCount; i++)
         {
-            int block_x = i;
-            int block_y = 0;
-
-            blockGridInBoard[block_x, block_y] = testBlocks[i];
+            blockGridInBoard[i + 1, 0] = testBlocks[i];
+            testBlocks[i].availableDrop = false;
         }
 
         // 줄확인
