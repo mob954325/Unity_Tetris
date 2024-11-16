@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Windows;
 using static Unity.Collections.AllocatorManager;
 
 public class Board : MonoBehaviour
@@ -41,6 +42,7 @@ public class Board : MonoBehaviour
     {
         input = FindAnyObjectByType<PlayerInput>();
         input.OnMove += MoveCurBlock;
+        input.OnSpin += RotateCurBlock;
 
         factory = FindAnyObjectByType<BlockFactory>();
         spawnPoint = transform.GetChild(0);
@@ -67,8 +69,6 @@ public class Board : MonoBehaviour
     private void LateUpdate()
     {
         CheckGameOver();
-
-        CheckBlockOverlap();
 
         // 밑에 블록이나 보드가 있으면 타이머 작동
         if (IsDownGridExist())
@@ -180,46 +180,6 @@ public class Board : MonoBehaviour
         }
 
         return result;
-    }
-
-    private void CheckBlockOverlap()
-    {
-        if (curBlock == null)
-            return;
-
-        for (int i = 0; i < curBlock.Length; i++)
-        {
-            if (i == 1) continue;
-
-            if (blockGridInBoard[curBlock[i].GridPosition.x, curBlock[i].GridPosition.y])
-            {
-                //Debug.Log("겹침");
-                if (curBlockSlotNum[i > 0 ? i - 1 : i] == 7)
-                {
-                    // 왼쪽이 겹쳤는가
-                    Debug.Log("left");
-                    foreach (var block in curBlock)
-                    {
-                        block.Move(1, 0);
-                    }
-                }
-                else if (curBlockSlotNum[i > 0 ? i - 1 : i] == 3)
-                {
-                    // 오른쪽이 겹쳤는가
-                    Debug.Log("right");
-                    foreach (var block in curBlock)
-                    {
-                        block.Move(-1, 0);
-                    }
-
-                }
-                else
-                {
-                    // 위 상황에서 왼쪽이나 오른쪽으로 갈 공간이 부족한가
-                    Debug.Log("adsf");
-                }
-            }
-        }
     }
 
     private void CheckLineClear()
@@ -384,6 +344,7 @@ public class Board : MonoBehaviour
         // 블록 뒤섞여있을 때 빈칸 찾기
         // 블록 쌓이고 회전 시켜보기
 
+        // 블록 회전 처리
         if(curShape == BlockShape.I)
         {
             // 0번째와 2번째만 이동시킨 후 
@@ -432,11 +393,17 @@ public class Board : MonoBehaviour
             }
         }
 
-        // 보드를 통과 했는지 확인
-        foreach(var checkBlock in curBlock)
+        // 위치 갱신
+        for(int i = 0; i < curBlock.Length; i++)
         {
-            // 보드 범위 확인
-            if (checkBlock.transform.position.x < 1)
+            curBlock[i].SetGrid(new Vector2Int((int)curBlock[i].transform.position.x, (int)curBlock[i].transform.position.y));
+        }
+
+        // 회전 후 겹쳤는지 확인
+        foreach (var checkBlock in curBlock)
+        {
+            // 보드 내에 있는지 확인
+            if (checkBlock.GridPosition.x < 1)
             {
                 // 왼쪽 벽을 통과 했으면
                 foreach (var block in curBlock)
@@ -454,7 +421,7 @@ public class Board : MonoBehaviour
                 }
                 break;
             }
-            else if(checkBlock.transform.position.x > horizontalCount)
+            else if(checkBlock.GridPosition.x > horizontalCount)
             {
                 // 오른쪽 벽을 통과 했으면
                 foreach (var block in curBlock)
@@ -472,7 +439,49 @@ public class Board : MonoBehaviour
                 }
                 break;
             }
-        }
+
+            if(checkBlock.GridPosition.y < 0)
+            {
+                if (curShape == BlockShape.I && curBlockSlotNum[2] == 5)
+                {
+                    foreach (var block in curBlock)
+                    {
+                        block.Move(0, 2);
+                    }
+                    Debug.Log("asdf");
+                }
+                else
+                {
+                    foreach (var block in curBlock)
+                    {
+                        block.Move(0, 1);
+                    }
+                    Debug.Log("asdf22");
+                }
+                break;
+            }
+
+            // 블록 끼리 겹쳤는 지 확인
+            if (checkBlock.GridPosition.x > 0 && checkBlock.GridPosition.x < horizontalCount + 1 && checkBlock.GridPosition.y >= 0 // 보드 내 있는지 체크
+                && blockGridInBoard[checkBlock.GridPosition.x, checkBlock.GridPosition.y]) // 해당 위치에 블록 있는지 체크
+            {
+                // 해당 위치에 블록이 존재하면 y축을 조사해서 가장 가까이에 있는 빈칸으로 이동
+                for (int y = checkBlock.GridPosition.y; y < verticalCount; y++)
+                {
+                    if (blockGridInBoard[checkBlock.GridPosition.x, y] == null)
+                    {
+                        int gap = y - checkBlock.GridPosition.y;
+
+                        for (int i = 0; i < curBlock.Length; i++)
+                        {
+                            curBlock[i].Move(0, gap);
+                        }
+                        break;
+                    }
+
+                }
+            }
+        } // foreach 끝
     }
 
     // 모양 함수 ======================================================================

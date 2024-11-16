@@ -11,7 +11,8 @@ public class PlayerInput : MonoBehaviour
     private IEnumerator OnMovePressCouroutine;
     private bool isPressedMove = false;
 
-    public Action<Vector2> OnMove;    
+    public Action<Vector2> OnMove;
+    public Action OnSpin;
 
     private void Awake()
     {
@@ -27,6 +28,7 @@ public class PlayerInput : MonoBehaviour
         action.Player.Drop.performed += OnDropInput;
         action.Player.Drop.canceled += OnDropInput;
         action.Player.Pause.performed += OnEscapeInput;        
+        action.Player.Spin.performed += OnSpinInput;
     }
 
     private void OnDisable()
@@ -49,6 +51,12 @@ public class PlayerInput : MonoBehaviour
     {
         Debug.Log("drop");
     }
+
+    private void OnSpinInput(InputAction.CallbackContext context)
+    {
+        OnSpin?.Invoke();
+    }
+
 
     private void OnMoveInputStart(InputAction.CallbackContext obj)
     {
