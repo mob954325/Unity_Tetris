@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -6,6 +7,8 @@ public class PlayerInput : MonoBehaviour
 {
     PlayerInputActions action;
 
+    private Vector2 moveVec;
+    private IEnumerator OnMovePressCouroutine;
     public Action<Vector2> OnMove;
 
     private void Awake()
@@ -16,11 +19,12 @@ public class PlayerInput : MonoBehaviour
     private void OnEnable()
     {
         action.Player.Enable();
+        action.Player.Move.started += OnMoveInputStart;
         action.Player.Move.performed += OnMoveInput;
-        //action.Player.Move.canceled += OnMove;
+        action.Player.Move.canceled += OnMoveInputEnd;
         action.Player.Drop.performed += OnDropInput;
         action.Player.Drop.canceled += OnDropInput;
-        action.Player.Pause.performed += OnEscapeInput;
+        action.Player.Pause.performed += OnEscapeInput;        
     }
 
     private void OnDisable()
@@ -28,8 +32,9 @@ public class PlayerInput : MonoBehaviour
         action.Player.Pause.performed -= OnEscapeInput;
         //action.Player.Drop.canceled -= OnDrop;
         action.Player.Drop.performed -= OnDropInput;
-        action.Player.Move.canceled -= OnMoveInput;
+        action.Player.Move.canceled -= OnMoveInputEnd;
         action.Player.Move.performed -= OnMoveInput;
+        action.Player.Move.started -= OnMoveInputStart;
         action.Player.Disable();
     }
 
@@ -43,13 +48,36 @@ public class PlayerInput : MonoBehaviour
         Debug.Log("drop");
     }
 
-    private void OnMoveInput(InputAction.CallbackContext obj)
+    private void OnMoveInputStart(InputAction.CallbackContext obj)
     {
-        Vector2 moveVec = obj.ReadValue<Vector2>();
+        moveVec = obj.ReadValue<Vector2>();
 
         if (moveVec != Vector2.one)
         {
-            OnMove?.Invoke(moveVec);    
+            OnMove?.Invoke(moveVec);
+        }
+    }
+
+    private void OnMoveInput(InputAction.CallbackContext obj)
+    {
+        OnMovePressCouroutine = OnMovePress(moveVec, obj.performed);
+
+        StartCoroutine(OnMovePressCouroutine);
+    }
+
+    private void OnMoveInputEnd(InputAction.CallbackContext obj)
+    {
+        StopCoroutine(OnMovePressCouroutine);
+    }
+
+    private IEnumerator OnMovePress(Vector2 moveVec, bool isPress)
+    {
+        yield return new WaitForSeconds(0.5f);
+
+        while(isPress)
+        {
+            OnMove?.Invoke(moveVec);
+            yield return null;
         }
     }
 

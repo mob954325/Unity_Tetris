@@ -70,6 +70,7 @@ public class Board : MonoBehaviour
 
         CheckBlockOverlap();
 
+        // 밑에 블록이나 보드가 있으면 타이머 작동
         if (IsDownGridExist())
         {
             timer += Time.deltaTime;
@@ -79,7 +80,8 @@ public class Board : MonoBehaviour
             timer = 0f;
         }
 
-        if(timer > 1f)
+        // 대기 시간이 초과되면 블록 생성
+        if (timer > 1f) 
         {
             BlockSpawnLoop();
             timer = 0f;
@@ -100,7 +102,7 @@ public class Board : MonoBehaviour
                     int block_x = curBlock[i].GridPosition.x;
                     int block_y = curBlock[i].GridPosition.y;
                     blockGridInBoard[block_x, block_y] = curBlock[i]; // 블록 저장
-                    Debug.Log(blockGridInBoard[block_x, block_y]);
+                    Debug.Log(blockGridInBoard[block_x, block_y].AvailableDrop);
                 }
 
                 SpawnBlock();
@@ -192,11 +194,11 @@ public class Board : MonoBehaviour
 
             if (blockGridInBoard[curBlock[i].GridPosition.x, curBlock[i].GridPosition.y])
             {
-                Debug.Log("겹침");
+                //Debug.Log("겹침");
                 if (curBlockSlotNum[i > 0 ? i - 1 : i] == 7)
                 {
                     // 왼쪽이 겹쳤는가
-                    Debug.Log("left");
+                    //Debug.Log("left");
                     foreach (var block in curBlock)
                     {
                         block.Move(1, 0);
@@ -205,7 +207,7 @@ public class Board : MonoBehaviour
                 else if (curBlockSlotNum[i > 0 ? i - 1 : i] == 3)
                 {
                     // 오른쪽이 겹쳤는가
-                    Debug.Log("right");
+                    //Debug.Log("right");
                     foreach (var block in curBlock)
                     {
                         block.Move(-1, 0);
@@ -215,7 +217,7 @@ public class Board : MonoBehaviour
                 else
                 {
                     // 위 상황에서 왼쪽이나 오른쪽으로 갈 공간이 부족한가
-                    Debug.Log("adsf");
+                    //Debug.Log("adsf");
                 }
             }
         }
@@ -354,10 +356,13 @@ public class Board : MonoBehaviour
 
         foreach(var block in curBlock)
         {
+            block.SetGrid(new Vector2Int((int)block.transform.position.x, (int)block.transform.position.y)); // 정확한 위치 확인을 위한 그리드 위치값 갱신
+
             Vector2 nextPosition = block.GridPosition + moveVec;
 
             if(nextPosition.x > 0 && nextPosition.y >= 0 && nextPosition.x < horizontalCount + 1 && nextPosition.y < verticalCount)
             {
+                Debug.Log(nextPosition);
                 // 다음 위치에 블록이 존재하지 않으면
                 if(blockGridInBoard[(int)nextPosition.x, (int)nextPosition.y] == null)
                 {

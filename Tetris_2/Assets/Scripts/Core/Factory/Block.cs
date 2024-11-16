@@ -35,7 +35,7 @@ public class Block : MonoBehaviour, IProduct
         {
             if(AvailableDrop)
             {
-                transform.position -= Vector3.up * FixedValues.BlockGap;
+                transform.position += Vector3.down * FixedValues.BlockGap;
             }
 
             timer = 0f;
