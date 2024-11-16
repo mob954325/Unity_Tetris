@@ -95,11 +95,12 @@ public class Board : MonoBehaviour
             // 한 개라도 비활성화되면
             if (!block.AvailableDrop)
             {
-                foreach (var item in curBlock)
+                for(int i = 0; i < curBlock.Length; i++)
                 {
-                    int block_x = item.GridPosition.x;
-                    int block_y = item.GridPosition.y;
-                    blockGridInBoard[block_x, block_y] = block; // 블록 저장
+                    int block_x = curBlock[i].GridPosition.x;
+                    int block_y = curBlock[i].GridPosition.y;
+                    blockGridInBoard[block_x, block_y] = curBlock[i]; // 블록 저장
+                    Debug.Log(blockGridInBoard[block_x, block_y]);
                 }
 
                 SpawnBlock();
@@ -234,27 +235,36 @@ public class Board : MonoBehaviour
                     blockObjs[x] = blockGridInBoard[x + 1, y].gameObject;
                 }
             }
-
-            // 개수가 가로칸만큼 있으면 배열에 있는 모든 블록 비활성화
+            
             if(count == horizontalCount)
             {
-                for(int i = 0; i < horizontalCount; i++)
+                // 개수가 가로칸만큼 있으면 배열에 있는 모든 블록 비활성화
+                for (int x = 0; x < horizontalCount; x++)
                 {
-                    blockObjs[i].SetActive(false);
-                    blockObjs[i] = null;
+                    blockObjs[x].SetActive(false);
+                    blockObjs[x] = null;
+
+                    blockGridInBoard[x + 1, y] = null;
                 }
 
                 // 모든 줄 내리기
-                for(int upper = y; upper < verticalCount; upper++)
+                for (int upper = y + 1; upper < verticalCount; upper++)
                 {
                     // Todo : 제거 후 위 블록 한 줄씩 내리고 다시 저장하기
+                    //Block[] existBlockGrids = new Block[10];
+
                     for(int x = 1; x < horizontalCount + 1; x++)
                     {
-/*                        Block temp = blockGridInBoard[x, upper];
-                        blockGridInBoard[x, upper].Move(Vector2Int.down);
-                        blockGridInBoard[x, upper] = null;
-                        blockGridInBoard[x - 1, upper] = temp;*/
-                        //blockGridInBoard[x, upper].SetGrid(blockGridInBoard[x, upper].GridPosition - Vector2Int.down);
+                        // 배열 한 칸씩 내리기
+                        // 실제 모델 한 칸씩 내리기
+                        if (blockGridInBoard[x, upper] != null)
+                        {
+                            Block tempBlock = blockGridInBoard[x, upper];
+
+                            blockGridInBoard[x, upper].Move(0, -1);
+                            blockGridInBoard[x, upper] = null;
+                            blockGridInBoard[x, upper - 1] = tempBlock;
+                        }
                     }
                 }
             }

@@ -47,6 +47,8 @@ public class Block : MonoBehaviour, IProduct
 
     private void OnDisable()
     {
+        timer = 0f; // 타이머 초기화 후 비활성화(재생성될 때 내려가는 속도 달라지는 거 방지)
+
         BeforeDisable?.Invoke();
         BeforeDisable = null;
     }
