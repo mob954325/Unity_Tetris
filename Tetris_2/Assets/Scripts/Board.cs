@@ -102,7 +102,6 @@ public class Board : MonoBehaviour
                     int block_x = curBlock[i].GridPosition.x;
                     int block_y = curBlock[i].GridPosition.y;
                     blockGridInBoard[block_x, block_y] = curBlock[i]; // 블록 저장
-                    Debug.Log(blockGridInBoard[block_x, block_y].AvailableDrop);
                 }
 
                 SpawnBlock();
@@ -198,7 +197,7 @@ public class Board : MonoBehaviour
                 if (curBlockSlotNum[i > 0 ? i - 1 : i] == 7)
                 {
                     // 왼쪽이 겹쳤는가
-                    //Debug.Log("left");
+                    Debug.Log("left");
                     foreach (var block in curBlock)
                     {
                         block.Move(1, 0);
@@ -207,7 +206,7 @@ public class Board : MonoBehaviour
                 else if (curBlockSlotNum[i > 0 ? i - 1 : i] == 3)
                 {
                     // 오른쪽이 겹쳤는가
-                    //Debug.Log("right");
+                    Debug.Log("right");
                     foreach (var block in curBlock)
                     {
                         block.Move(-1, 0);
@@ -217,7 +216,7 @@ public class Board : MonoBehaviour
                 else
                 {
                     // 위 상황에서 왼쪽이나 오른쪽으로 갈 공간이 부족한가
-                    //Debug.Log("adsf");
+                    Debug.Log("adsf");
                 }
             }
         }
@@ -362,7 +361,6 @@ public class Board : MonoBehaviour
 
             if(nextPosition.x > 0 && nextPosition.y >= 0 && nextPosition.x < horizontalCount + 1 && nextPosition.y < verticalCount)
             {
-                Debug.Log(nextPosition);
                 // 다음 위치에 블록이 존재하지 않으면
                 if(blockGridInBoard[(int)nextPosition.x, (int)nextPosition.y] == null)
                 {

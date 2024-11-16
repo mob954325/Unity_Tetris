@@ -9,7 +9,9 @@ public class PlayerInput : MonoBehaviour
 
     private Vector2 moveVec;
     private IEnumerator OnMovePressCouroutine;
-    public Action<Vector2> OnMove;
+    private bool isPressedMove = false;
+
+    public Action<Vector2> OnMove;    
 
     private void Awake()
     {
@@ -21,7 +23,7 @@ public class PlayerInput : MonoBehaviour
         action.Player.Enable();
         action.Player.Move.started += OnMoveInputStart;
         action.Player.Move.performed += OnMoveInput;
-        action.Player.Move.canceled += OnMoveInputEnd;
+        action.Player.Move.canceled += OnMoveInput;
         action.Player.Drop.performed += OnDropInput;
         action.Player.Drop.canceled += OnDropInput;
         action.Player.Pause.performed += OnEscapeInput;        
@@ -32,7 +34,7 @@ public class PlayerInput : MonoBehaviour
         action.Player.Pause.performed -= OnEscapeInput;
         //action.Player.Drop.canceled -= OnDrop;
         action.Player.Drop.performed -= OnDropInput;
-        action.Player.Move.canceled -= OnMoveInputEnd;
+        action.Player.Move.canceled -= OnMoveInput;
         action.Player.Move.performed -= OnMoveInput;
         action.Player.Move.started -= OnMoveInputStart;
         action.Player.Disable();
@@ -60,16 +62,17 @@ public class PlayerInput : MonoBehaviour
 
     private void OnMoveInput(InputAction.CallbackContext obj)
     {
-        OnMovePressCouroutine = OnMovePress(moveVec, obj.performed);
 
-        StartCoroutine(OnMovePressCouroutine);
+        if(obj.performed)
+        {
+            OnMovePressCouroutine = OnMovePress(moveVec, obj.performed);
+            StartCoroutine(OnMovePressCouroutine);
+        }
+        else
+        {
+            StopAllCoroutines();
+        }
     }
-
-    private void OnMoveInputEnd(InputAction.CallbackContext obj)
-    {
-        StopCoroutine(OnMovePressCouroutine);
-    }
-
     private IEnumerator OnMovePress(Vector2 moveVec, bool isPress)
     {
         yield return new WaitForSeconds(0.5f);
