@@ -9,7 +9,6 @@ public class PlayerInput : MonoBehaviour
 
     private Vector2 moveVec;
     private IEnumerator OnMovePressCouroutine;
-    private bool isPressedMove = false;
 
     public Action<Vector2> OnMove;
     public Action OnSpin;
@@ -24,32 +23,16 @@ public class PlayerInput : MonoBehaviour
         action.Player.Enable();
         action.Player.Move.started += OnMoveInputStart;
         action.Player.Move.performed += OnMoveInput;
-        action.Player.Move.canceled += OnMoveInput;
-        action.Player.Drop.performed += OnDropInput;
-        action.Player.Drop.canceled += OnDropInput;
-        action.Player.Pause.performed += OnEscapeInput;        
+        action.Player.Move.canceled += OnMoveInput;      
         action.Player.Spin.performed += OnSpinInput;
     }
 
     private void OnDisable()
     {
-        action.Player.Pause.performed -= OnEscapeInput;
-        //action.Player.Drop.canceled -= OnDrop;
-        action.Player.Drop.performed -= OnDropInput;
         action.Player.Move.canceled -= OnMoveInput;
         action.Player.Move.performed -= OnMoveInput;
         action.Player.Move.started -= OnMoveInputStart;
         action.Player.Disable();
-    }
-
-    private void OnEscapeInput(InputAction.CallbackContext context)
-    {
-        Debug.Log("esc");
-    }
-
-    private void OnDropInput(InputAction.CallbackContext context)
-    {
-        Debug.Log("drop");
     }
 
     private void OnSpinInput(InputAction.CallbackContext context)

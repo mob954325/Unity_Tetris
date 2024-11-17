@@ -13,8 +13,6 @@ public class Block : MonoBehaviour, IProduct
     /// </summary>
     public Vector2Int GridPosition { get => gridPosition; }
 
-    private string productName = "Block";
-
     public string ProductName { get; set; }
 
     private float timer = 0f;
