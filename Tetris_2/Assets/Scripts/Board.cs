@@ -8,6 +8,7 @@ using static Unity.Collections.AllocatorManager;
 
 public class Board : MonoBehaviour
 {
+    private GameManager manager;
     private PlayerInput input;
     private Transform spawnPoint;
     
@@ -36,15 +37,26 @@ public class Board : MonoBehaviour
     private int colorTypeCount = -1;
     public int shapeTypeCount = -1;
 
+    /// <summary>
+    /// 블록 멈추기까지 대기 시간
+    /// </summary>
+    private float disableTimer = 0f;
+    private float disableTime = 1f;
+
     private bool isBlockExist = false;
+
+    private void Awake()
+    {
+        input = FindAnyObjectByType<PlayerInput>();
+        factory = FindAnyObjectByType<BlockFactory>();
+        manager = FindAnyObjectByType<GameManager>();
+    }
 
     private void Start()
     {
-        input = FindAnyObjectByType<PlayerInput>();
         input.OnMove += MoveCurBlock;
         input.OnSpin += RotateCurBlock;
 
-        factory = FindAnyObjectByType<BlockFactory>();
         spawnPoint = transform.GetChild(0);
 
         curBlock = new Block[4];
@@ -61,30 +73,31 @@ public class Board : MonoBehaviour
             }
         }
 
-        SpawnBlock();
+        manager.OnStartGame += SpawnBlock;
     }
 
-
-    float timer = 0f;
     private void LateUpdate()
     {
+        if (!isBlockExist)
+            return;
+
         CheckGameOver();
 
         // 밑에 블록이나 보드가 있으면 타이머 작동
         if (IsDownGridExist())
         {
-            timer += Time.deltaTime;
+            disableTimer += Time.deltaTime;
         }
         else // 닿은게 없으면 타이머 초기화
         {
-            timer = 0f;
+            disableTimer = 0f;
         }
 
         // 대기 시간이 초과되면 블록 생성
-        if (timer > 1f) 
+        if (disableTimer > disableTime) 
         {
             BlockSpawnLoop();
-            timer = 0f;
+            disableTimer = 0f;
         }
 
         CheckLineClear();
@@ -121,6 +134,15 @@ public class Board : MonoBehaviour
             {
                 // y값 20에 있으면 블록 생상 중단 (어차피 그 이상은 20을 거쳐야하기 때문)
                 isBlockExist = false;
+
+                foreach(var block in curBlock)
+                {
+                    block.gameObject.SetActive(false);
+                }
+
+                manager.OnEndGame?.Invoke();
+
+                break;
             }
         }
     }
@@ -149,7 +171,7 @@ public class Board : MonoBehaviour
 
                 break;
             }
-            else if (block_x > 0 && block_y > 0 && block_x < horizontalCount && block_y < verticalCount) // 보드 범위 내 체크
+            else if (block_x > 0 && block_y > 0 && block_x < horizontalCount + 1 && block_y < verticalCount) // 보드 범위 내 체크
             {
                 // y좌표 1칸 밑에 블록이 있으면 정지
                 if (blockGridInBoard[block_x, block_y - 1] != null)
@@ -206,14 +228,12 @@ public class Board : MonoBehaviour
                     blockObjs[x] = null;
 
                     blockGridInBoard[x + 1, y] = null;
+                    manager.Score++;
                 }
 
                 // 모든 줄 내리기
                 for (int upper = y + 1; upper < verticalCount; upper++)
                 {
-                    // Todo : 제거 후 위 블록 한 줄씩 내리고 다시 저장하기
-                    //Block[] existBlockGrids = new Block[10];
-
                     for(int x = 1; x < horizontalCount + 1; x++)
                     {
                         // 배열 한 칸씩 내리기
